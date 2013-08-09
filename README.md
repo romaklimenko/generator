@@ -1,0 +1,4 @@
+generator
+=========
+
+Sitecore.Analytics.DataGenerator
