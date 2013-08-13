@@ -1,11 +1,3 @@
-# Sitecore
-Data/
-Database/
-Website/
-
-!Website/Sitecore.Analytics.DataGenerator.sln
-!Website/sitecore modules/Shell/Sitecore.Analytics.DataGenerator
-
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
 [Bb]in/
 [Oo]bj/
