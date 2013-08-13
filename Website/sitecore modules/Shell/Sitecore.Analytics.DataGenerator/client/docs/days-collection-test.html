@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>days-collection-test.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="app.html">
+                app.js
+              </a>
+            
+              
+              <a class="source" href="days-collection.html">
+                days-collection.js
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.js
+              </a>
+            
+              
+              <a class="source" href="day-model.html">
+                day-model.js
+              </a>
+            
+              
+              <a class="source" href="router.html">
+                router.js
+              </a>
+            
+              
+              <a class="source" href="days-collection-test.html">
+                days-collection-test.js
+              </a>
+            
+              
+              <a class="source" href="day-model-test.html">
+                day-model-test.js
+              </a>
+            
+              
+              <a class="source" href="backbone.html">
+                backbone.js
+              </a>
+            
+              
+              <a class="source" href="bootstrap.html">
+                bootstrap.js
+              </a>
+            
+              
+              <a class="source" href="chai.html">
+                chai.js
+              </a>
+            
+              
+              <a class="source" href="jquery.html">
+                jquery.js
+              </a>
+            
+              
+              <a class="source" href="mocha.html">
+                mocha.js
+              </a>
+            
+              
+              <a class="source" href="raphael.html">
+                raphael.js
+              </a>
+            
+              
+              <a class="source" href="require.html">
+                require.js
+              </a>
+            
+              
+              <a class="source" href="text.html">
+                text.js
+              </a>
+            
+              
+              <a class="source" href="underscore.html">
+                underscore.js
+              </a>
+            
+              
+              <a class="source" href="chart-view.html">
+                chart-view.js
+              </a>
+            
+              
+              <a class="source" href="default-view.html">
+                default-view.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>days-collection-test.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/* global before: true */</span>
+<span class="comment">/* global define: true */</span>
+<span class="comment">/* global describe: true */</span>
+<span class="comment">/* global it: true */</span>
+
+define([<span class="string">"main"</span>, <span class="string">"../../js/vendor/chai.js"</span>, <span class="string">"day-model"</span>, <span class="string">"days-collection"</span>],
+  <span class="keyword">function</span>(Main, Chai, DayModel, DaysCollection) {
+    <span class="string">"use strict"</span>;
+
+    <span class="keyword">var</span> assert = Chai.assert;
+
+    before(<span class="keyword">function</span>() {
+      <span class="keyword">this</span>.daysCollection = <span class="keyword">new</span> DaysCollection();
+
+      <span class="keyword">var</span> dayModel0 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130101"</span>, visits: <span class="number">1</span>, value: <span class="number">9</span> });
+      <span class="keyword">var</span> dayModel1 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130102"</span>, visits: <span class="number">2</span>, value: <span class="number">8</span> });
+      <span class="keyword">var</span> dayModel2 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130103"</span>, visits: <span class="number">3</span>, value: <span class="number">7</span> });
+      <span class="keyword">var</span> dayModel3 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130104"</span>, visits: <span class="number">4</span>, value: <span class="number">6</span> });
+      <span class="keyword">var</span> dayModel4 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130105"</span>, visits: <span class="number">5</span>, value: <span class="number">5</span> });
+      <span class="keyword">var</span> dayModel5 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130106"</span>, visits: <span class="number">6</span>, value: <span class="number">4</span> });
+      <span class="keyword">var</span> dayModel6 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130107"</span>, visits: <span class="number">7</span>, value: <span class="number">3</span> });
+      <span class="keyword">var</span> dayModel7 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130108"</span>, visits: <span class="number">8</span>, value: <span class="number">2</span> });
+      <span class="keyword">var</span> dayModel8 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130109"</span>, visits: <span class="number">9</span>, value: <span class="number">1</span> });
+      <span class="keyword">var</span> dayModel9 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130110"</span>, visits: <span class="number">0</span>, value: <span class="number">0</span> });
+
+      <span class="keyword">this</span>.daysCollection.add(dayModel0);
+      <span class="keyword">this</span>.daysCollection.add(dayModel1);
+      <span class="keyword">this</span>.daysCollection.add(dayModel2);
+      <span class="keyword">this</span>.daysCollection.add(dayModel3);
+      <span class="keyword">this</span>.daysCollection.add(dayModel4);
+      <span class="keyword">this</span>.daysCollection.add(dayModel5);
+      <span class="keyword">this</span>.daysCollection.add(dayModel6);
+      <span class="keyword">this</span>.daysCollection.add(dayModel7);
+      <span class="keyword">this</span>.daysCollection.add(dayModel8);
+      <span class="keyword">this</span>.daysCollection.add(dayModel9);
+    });
+
+    describe(<span class="string">"DaysCollection"</span>, <span class="keyword">function</span>() {
+      describe(<span class="string">"#complement()"</span>, <span class="keyword">function</span>() {
+        it(<span class="string">"adds missed days from lesser date till today"</span>, <span class="keyword">function</span>() {
+          <span class="keyword">var</span> dayModel1 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130101"</span> });
+          <span class="keyword">var</span> dayModel3 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130103"</span> });
+
+          <span class="keyword">var</span> daysCollection = <span class="keyword">new</span> DaysCollection();
+          daysCollection.add([dayModel1, dayModel3]);
+
+          daysCollection.complement();
+
+          <span class="keyword">var</span> now = <span class="keyword">new</span> Date();
+          now.setMilliseconds(<span class="number">0</span>);
+          now.setMinutes(<span class="number">0</span>);
+          now.setHours(<span class="number">0</span>);
+
+          assert.equal(
+            daysCollection.length,
+            Math.round((now - dayModel1.getDate()) / <span class="number">1000</span> / <span class="number">60</span> / <span class="number">60</span> / <span class="number">24</span>));
+        });
+
+        it(<span class="string">"should be sorted if complemented"</span>, <span class="keyword">function</span>() {
+          <span class="keyword">var</span> dayModel1 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130101"</span> });
+          <span class="keyword">var</span> dayModel3 = <span class="keyword">new</span> DayModel({ date: <span class="string">"20130103"</span> });
+
+          <span class="keyword">var</span> daysCollection = <span class="keyword">new</span> DaysCollection();
+          daysCollection.add([dayModel1, dayModel3]);
+
+          daysCollection.complement();
+
+          <span class="keyword">var</span> now = <span class="keyword">new</span> Date();
+          now.setMilliseconds(<span class="number">0</span>);
+          now.setMinutes(<span class="number">0</span>);
+          now.setHours(<span class="number">0</span>);
+
+          <span class="keyword">var</span> previousDate = <span class="keyword">new</span> Date(<span class="string">"1970-01-01"</span>);
+          <span class="keyword">var</span> nextDate;
+
+          <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; daysCollection.models.length; i++) {
+            nextDate = daysCollection.models[i].getDate();
+            assert.isTrue(previousDate &lt; nextDate);
+            previousDate = nextDate;
+          }
+        });
+      });
+
+      describe(<span class="string">"#shrink(n)"</span>, <span class="keyword">function</span>() {
+        it(<span class="string">"should return a collection shrinked to specific number of elements"</span>, <span class="keyword">function</span>() {
+          <span class="keyword">var</span> lengthExpected = <span class="number">3</span>;
+          <span class="keyword">var</span> shrinkedCollection = <span class="keyword">this</span>.daysCollection.shrink(lengthExpected);
+          assert.equal(lengthExpected, shrinkedCollection.length);
+        });
+
+        it(<span class="string">"original collection should remain the same"</span>, <span class="keyword">function</span>() {
+          <span class="keyword">var</span> lengthExpected = <span class="keyword">this</span>.daysCollection.length;
+          <span class="keyword">this</span>.daysCollection.shrink(lengthExpected);
+          assert.equal(lengthExpected, <span class="keyword">this</span>.daysCollection.length);
+        });
+
+        it(<span class="string">"should contain average values on each element"</span>, <span class="keyword">function</span>() {
+          <span class="keyword">var</span> lengthExpected = <span class="number">3</span>;
+          <span class="keyword">var</span> shrinkedCollection = <span class="keyword">this</span>.daysCollection.shrink(lengthExpected);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>first group:
+20130101 1 9
+20130102 2 8
+20130103 3 7
+20130104 4 6</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          assert.equal(<span class="string">"20130101"</span>, shrinkedCollection.models[<span class="number">0</span>].get(<span class="string">"date"</span>));
+          assert.equal(
+            Math.floor((<span class="number">1</span> + <span class="number">2</span> + <span class="number">3</span> + <span class="number">4</span>) / <span class="number">4</span>),
+            shrinkedCollection.models[<span class="number">0</span>].get(<span class="string">"visits"</span>));
+          assert.equal(
+            Math.floor((<span class="number">9</span> + <span class="number">8</span> + <span class="number">7</span> + <span class="number">6</span>) / <span class="number">4</span>),
+            shrinkedCollection.models[<span class="number">0</span>].get(<span class="string">"value"</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>second group:
+20130105 5 5
+20130106 6 4
+20130107 7 3
+20130108 8 2</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          assert.equal(<span class="string">"20130105"</span>, shrinkedCollection.models[<span class="number">1</span>].get(<span class="string">"date"</span>));
+          assert.equal(
+            Math.floor((<span class="number">5</span> + <span class="number">6</span> + <span class="number">7</span> + <span class="number">8</span>) / <span class="number">4</span>),
+            shrinkedCollection.models[<span class="number">1</span>].get(<span class="string">"visits"</span>));
+          assert.equal(
+            Math.floor((<span class="number">5</span> + <span class="number">4</span> + <span class="number">3</span> + <span class="number">2</span>) / <span class="number">4</span>),
+            shrinkedCollection.models[<span class="number">1</span>].get(<span class="string">"value"</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>third group:
+20130109 9 1
+20130110 0 0</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          assert.equal(<span class="string">"20130109"</span>, shrinkedCollection.models[<span class="number">2</span>].get(<span class="string">"date"</span>));
+          assert.equal(
+            Math.floor(<span class="number">9</span> / <span class="number">2</span>),
+            shrinkedCollection.models[<span class="number">2</span>].get(<span class="string">"visits"</span>));
+          assert.equal(
+            Math.floor(<span class="number">1</span> / <span class="number">2</span>),
+            shrinkedCollection.models[<span class="number">2</span>].get(<span class="string">"value"</span>));
+        });
+      });
+    });
+  }
+);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

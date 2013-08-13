@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curves</title>
+    <link rel="stylesheet" href="./css/vendor/bootstrap.css">
+    <link rel="stylesheet" href="./css/main.css">
+  </head>
+  <body>
+    <div class="navbar">
+      <ul class="nav navbar-nav">
+        <li class="active">
+          <a href="#"
+            onclick="javascript:window.location.hash = '';return false;">Sitecore Analytics Data Generator</a>
+        </li>
+      </ul>
+    </div>
+    <div id="app" class="content pure-u-1 app"></div>
+    <footer class="footer">
+      <center>
+        <a href="./docs/main.html" target="_blank">Docco ↑</a> •
+        <a href="./test.html" target="_blank">Mocha ↑</a> •
+        <a href="https://github.com/romaklimenko/curves" target="_blank">GitHub ↑</a>
+      </center>
+    </footer>
+    <script data-main="./js/main" src="./js/vendor/require.js"></script>
+    <script type="text/javascript">
+      var _gauges = _gauges || [];
+      (function() {
+        var t   = document.createElement('script');
+        t.type  = 'text/javascript';
+        t.async = true;
+        t.id    = 'gauges-tracker';
+        t.setAttribute('data-site-id', '4fa27221613f5d641e0000d0');
+        t.src = '//secure.gaug.es/track.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(t, s);
+      })();
+    </script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-38187669-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+  </body>
+</html>

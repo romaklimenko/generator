@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./css/vendor/mocha.css" rel="stylesheet">
+  <script src="./js/vendor/require.js"></script>
+  <script type="text/javascript">
+    require.config(
+      {
+        baseUrl: "./js/",
+      }
+    );
+    require(["main"],
+      function() {
+        require(
+          [
+            "require",
+            "./js/vendor/chai.js",
+            "./js/vendor/mocha.js"
+          ],
+          function(require) {
+            mocha.setup("tdd");
+            require(
+              [
+                "tests/collections/days-collection-test",
+                "tests/models/day-model-test"
+              ],
+              function(){
+                mocha.run();
+              }
+            );
+          }
+        );
+      }
+    )
+  </script>
+</head>
+<body>
+  <div id="mocha"></div>
+</body>
+</html>

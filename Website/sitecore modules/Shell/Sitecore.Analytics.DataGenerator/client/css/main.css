@@ -1,0 +1,23 @@
+body, html {
+  height:95%;
+}
+
+div.app {
+  height:90%;
+}
+
+div#default-view-top-chart, div#default-view-bottom-chart {
+  height: 45%;
+}
+
+div.chart-header {
+  text-transform: uppercase;
+  color: #565d64;
+  margin: 0px 0px 0px 10px;
+  font-size: 90%;
+}
+
+.navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+  color: #FFF;
+  background-color: #C73318;
+}

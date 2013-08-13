@@ -1,0 +1,4307 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>require.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="app.html">
+                app.js
+              </a>
+            
+              
+              <a class="source" href="days-collection.html">
+                days-collection.js
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.js
+              </a>
+            
+              
+              <a class="source" href="day-model.html">
+                day-model.js
+              </a>
+            
+              
+              <a class="source" href="router.html">
+                router.js
+              </a>
+            
+              
+              <a class="source" href="days-collection-test.html">
+                days-collection-test.js
+              </a>
+            
+              
+              <a class="source" href="day-model-test.html">
+                day-model-test.js
+              </a>
+            
+              
+              <a class="source" href="backbone.html">
+                backbone.js
+              </a>
+            
+              
+              <a class="source" href="bootstrap.html">
+                bootstrap.js
+              </a>
+            
+              
+              <a class="source" href="chai.html">
+                chai.js
+              </a>
+            
+              
+              <a class="source" href="jquery.html">
+                jquery.js
+              </a>
+            
+              
+              <a class="source" href="mocha.html">
+                mocha.js
+              </a>
+            
+              
+              <a class="source" href="raphael.html">
+                raphael.js
+              </a>
+            
+              
+              <a class="source" href="require.html">
+                require.js
+              </a>
+            
+              
+              <a class="source" href="text.html">
+                text.js
+              </a>
+            
+              
+              <a class="source" href="underscore.html">
+                underscore.js
+              </a>
+            
+              
+              <a class="source" href="chart-view.html">
+                chart-view.js
+              </a>
+            
+              
+              <a class="source" href="default-view.html">
+                default-view.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>require.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/** vim: et:ts=4:sw=4:sts=4
+ * @license RequireJS 2.1.6 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/requirejs for details
+ */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Not using strict: uneven strict support in browsers, #392, and causes
+problems with requirejs.exec()/transpiler plugins that may not be strict.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/*jslint regexp: true, nomen: true, sloppy: true */</span>
+<span class="comment">/*global window, navigator, document, importScripts, setTimeout, opera */</span>
+
+<span class="keyword">var</span> requirejs, require, define;
+(<span class="function"><span class="keyword">function</span> <span class="params">(global)</span> {</span>
+    <span class="keyword">var</span> req, s, head, baseElement, dataMain, src,
+        interactiveScript, currentlyAddingScript, mainScript, subPath,
+        version = <span class="string">'2.1.6'</span>,
+        commentRegExp = <span class="regexp">/(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg</span>,
+        cjsRequireRegExp = <span class="regexp">/[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g</span>,
+        jsSuffixRegExp = <span class="regexp">/\.js$/</span>,
+        currDirRegExp = <span class="regexp">/^\.\//</span>,
+        op = Object.prototype,
+        ostring = op.toString,
+        hasOwn = op.hasOwnProperty,
+        ap = Array.prototype,
+        apsp = ap.splice,
+        isBrowser = !!(<span class="keyword">typeof</span> window !== <span class="string">'undefined'</span> &amp;&amp; navigator &amp;&amp; window.document),
+        isWebWorker = !isBrowser &amp;&amp; <span class="keyword">typeof</span> importScripts !== <span class="string">'undefined'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>PS3 indicates loaded and complete, but need to wait for complete
+specifically. Sequence is &#39;loading&#39;, &#39;loaded&#39;, execution,
+then &#39;complete&#39;. The UA check is unfortunate, but not sure how
+to feature test w/o causing perf issues.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        readyRegExp = isBrowser &amp;&amp; navigator.platform === <span class="string">'PLAYSTATION 3'</span> ?
+                      <span class="regexp">/^complete$/</span> : <span class="regexp">/^(complete|loaded)$/</span>,
+        defContextName = <span class="string">'_'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Oh the tragedy, detecting opera. See the usage of isOpera for reason.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        isOpera = <span class="keyword">typeof</span> opera !== <span class="string">'undefined'</span> &amp;&amp; opera.toString() === <span class="string">'[object Opera]'</span>,
+        contexts = {},
+        cfg = {},
+        globalDefQueue = [],
+        useInteractive = <span class="literal">false</span>;
+
+    <span class="function"><span class="keyword">function</span> <span class="title">isFunction</span><span class="params">(it)</span> {</span>
+        <span class="keyword">return</span> ostring.call(it) === <span class="string">'[object Function]'</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">isArray</span><span class="params">(it)</span> {</span>
+        <span class="keyword">return</span> ostring.call(it) === <span class="string">'[object Array]'</span>;
+    }
+
+    <span class="comment">/**
+     * Helper function for iterating over an array. If the func returns
+     * a true value, it will break out of the loop.
+     */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(ary, func)</span> {</span>
+        <span class="keyword">if</span> (ary) {
+            <span class="keyword">var</span> i;
+            <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ary.length; i += <span class="number">1</span>) {
+                <span class="keyword">if</span> (ary[i] &amp;&amp; func(ary[i], i, ary)) {
+                    <span class="keyword">break</span>;
+                }
+            }
+        }
+    }
+
+    <span class="comment">/**
+     * Helper function for iterating over an array backwards. If the func
+     * returns a true value, it will break out of the loop.
+     */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">eachReverse</span><span class="params">(ary, func)</span> {</span>
+        <span class="keyword">if</span> (ary) {
+            <span class="keyword">var</span> i;
+            <span class="keyword">for</span> (i = ary.length - <span class="number">1</span>; i &gt; -<span class="number">1</span>; i -= <span class="number">1</span>) {
+                <span class="keyword">if</span> (ary[i] &amp;&amp; func(ary[i], i, ary)) {
+                    <span class="keyword">break</span>;
+                }
+            }
+        }
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">hasProp</span><span class="params">(obj, prop)</span> {</span>
+        <span class="keyword">return</span> hasOwn.call(obj, prop);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">getOwn</span><span class="params">(obj, prop)</span> {</span>
+        <span class="keyword">return</span> hasProp(obj, prop) &amp;&amp; obj[prop];
+    }
+
+    <span class="comment">/**
+     * Cycles over properties in an object and calls a function for each
+     * property value. If the function returns a truthy value, then the
+     * iteration is stopped.
+     */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">eachProp</span><span class="params">(obj, func)</span> {</span>
+        <span class="keyword">var</span> prop;
+        <span class="keyword">for</span> (prop <span class="keyword">in</span> obj) {
+            <span class="keyword">if</span> (hasProp(obj, prop)) {
+                <span class="keyword">if</span> (func(obj[prop], prop)) {
+                    <span class="keyword">break</span>;
+                }
+            }
+        }
+    }
+
+    <span class="comment">/**
+     * Simple function to mix in properties from source into target,
+     * but only if target does not already have a property of the same name.
+     */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">mixin</span><span class="params">(target, source, force, deepStringMixin)</span> {</span>
+        <span class="keyword">if</span> (source) {
+            eachProp(source, <span class="function"><span class="keyword">function</span> <span class="params">(value, prop)</span> {</span>
+                <span class="keyword">if</span> (force || !hasProp(target, prop)) {
+                    <span class="keyword">if</span> (deepStringMixin &amp;&amp; <span class="keyword">typeof</span> value !== <span class="string">'string'</span>) {
+                        <span class="keyword">if</span> (!target[prop]) {
+                            target[prop] = {};
+                        }
+                        mixin(target[prop], value, force, deepStringMixin);
+                    } <span class="keyword">else</span> {
+                        target[prop] = value;
+                    }
+                }
+            });
+        }
+        <span class="keyword">return</span> target;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Similar to Function.prototype.bind, but the &#39;this&#39; object is specified
+first, since it is easier to read/figure out what &#39;this&#39; will be.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">bind</span><span class="params">(obj, fn)</span> {</span>
+        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            <span class="keyword">return</span> fn.apply(obj, arguments);
+        };
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">scripts</span><span class="params">()</span> {</span>
+        <span class="keyword">return</span> document.getElementsByTagName(<span class="string">'script'</span>);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">defaultOnError</span><span class="params">(err)</span> {</span>
+        <span class="keyword">throw</span> err;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Allow getting a global that expressed in
+dot notation, like &#39;a.b.c&#39;.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">getGlobal</span><span class="params">(value)</span> {</span>
+        <span class="keyword">if</span> (!value) {
+            <span class="keyword">return</span> value;
+        }
+        <span class="keyword">var</span> g = global;
+        each(value.split(<span class="string">'.'</span>), <span class="function"><span class="keyword">function</span> <span class="params">(part)</span> {</span>
+            g = g[part];
+        });
+        <span class="keyword">return</span> g;
+    }
+
+    <span class="comment">/**
+     * Constructs an error with a pointer to an URL with more information.
+     * @param {String} id the error ID that maps to an ID on a web page.
+     * @param {String} message human readable error.
+     * @param {Error} [err] the original error, if there is one.
+     *
+     * @returns {Error}
+     */</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">makeError</span><span class="params">(id, msg, err, requireModules)</span> {</span>
+        <span class="keyword">var</span> e = <span class="keyword">new</span> Error(msg + <span class="string">'\nhttp://requirejs.org/docs/errors.html#'</span> + id);
+        e.requireType = id;
+        e.requireModules = requireModules;
+        <span class="keyword">if</span> (err) {
+            e.originalError = err;
+        }
+        <span class="keyword">return</span> e;
+    }
+
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> define !== <span class="string">'undefined'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>If a define is already in play via another AMD loader,
+do not overwrite.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">return</span>;
+    }
+
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> requirejs !== <span class="string">'undefined'</span>) {
+        <span class="keyword">if</span> (isFunction(requirejs)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Do not overwrite and existing requirejs instance.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span>;
+        }
+        cfg = requirejs;
+        requirejs = <span class="literal">undefined</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Allow for a require config object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (<span class="keyword">typeof</span> require !== <span class="string">'undefined'</span> &amp;&amp; !isFunction(require)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>assume it is a config object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        cfg = require;
+        require = <span class="literal">undefined</span>;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">newContext</span><span class="params">(contextName)</span> {</span>
+        <span class="keyword">var</span> inCheckLoaded, Module, context, handlers,
+            checkLoadedTimeoutId,
+            config = {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Defaults. Do not set a default for map
+config to speed up normalize(), which
+will run faster if there is no default.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                waitSeconds: <span class="number">7</span>,
+                baseUrl: <span class="string">'./'</span>,
+                paths: {},
+                pkgs: {},
+                shim: {},
+                config: {}
+            },
+            registry = {},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>registry of just enabled modules, to speed
+cycle breaking code when lots of modules
+are registered, but not activated.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            enabledRegistry = {},
+            undefEvents = {},
+            defQueue = [],
+            defined = {},
+            urlFetched = {},
+            requireCounter = <span class="number">1</span>,
+            unnormalizedCounter = <span class="number">1</span>;
+
+        <span class="comment">/**
+         * Trims the . and .. from an array of path segments.
+         * It will keep a leading path segment if a .. will become
+         * the first path segment, to help with module name lookups,
+         * which act like paths, but can be remapped. But the end result,
+         * all paths that use this function should look normalized.
+         * NOTE: this method MODIFIES the input array.
+         * @param {Array} ary the array of path segments.
+         */</span>
+        <span class="function"><span class="keyword">function</span> <span class="title">trimDots</span><span class="params">(ary)</span> {</span>
+            <span class="keyword">var</span> i, part;
+            <span class="keyword">for</span> (i = <span class="number">0</span>; ary[i]; i += <span class="number">1</span>) {
+                part = ary[i];
+                <span class="keyword">if</span> (part === <span class="string">'.'</span>) {
+                    ary.splice(i, <span class="number">1</span>);
+                    i -= <span class="number">1</span>;
+                } <span class="keyword">else</span> <span class="keyword">if</span> (part === <span class="string">'..'</span>) {
+                    <span class="keyword">if</span> (i === <span class="number">1</span> &amp;&amp; (ary[<span class="number">2</span>] === <span class="string">'..'</span> || ary[<span class="number">0</span>] === <span class="string">'..'</span>)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>End of the line. Keep at least one non-dot
+path segment at the front so it can be mapped
+correctly to disk. Otherwise, there is likely
+no path mapping for a path starting with &#39;..&#39;.
+This can still fail, but catches the most reasonable
+uses of ..</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">break</span>;
+                    } <span class="keyword">else</span> <span class="keyword">if</span> (i &gt; <span class="number">0</span>) {
+                        ary.splice(i - <span class="number">1</span>, <span class="number">2</span>);
+                        i -= <span class="number">2</span>;
+                    }
+                }
+            }
+        }
+
+        <span class="comment">/**
+         * Given a relative module name, like ./something, normalize it to
+         * a real name that can be mapped to a path.
+         * @param {String} name the relative name
+         * @param {String} baseName a real name that the name arg is relative
+         * to.
+         * @param {Boolean} applyMap apply the map config to the value. Should
+         * only be done if this normalization is for a dependency ID.
+         * @returns {String} normalized name
+         */</span>
+        <span class="function"><span class="keyword">function</span> <span class="title">normalize</span><span class="params">(name, baseName, applyMap)</span> {</span>
+            <span class="keyword">var</span> pkgName, pkgConfig, mapValue, nameParts, i, j, nameSegment,
+                foundMap, foundI, foundStarMap, starI,
+                baseParts = baseName &amp;&amp; baseName.split(<span class="string">'/'</span>),
+                normalizedBaseParts = baseParts,
+                map = config.map,
+                starMap = map &amp;&amp; map[<span class="string">'*'</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Adjust any relative paths.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (name &amp;&amp; name.charAt(<span class="number">0</span>) === <span class="string">'.'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>If have a base name, try to normalize against it,
+otherwise, assume it is a top-level require that will
+be relative to baseUrl in the end.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (baseName) {
+                    <span class="keyword">if</span> (getOwn(config.pkgs, baseName)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>If the baseName is a package name, then just treat it as one
+name to concat the name with.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        normalizedBaseParts = baseParts = [baseName];
+                    } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Convert baseName to array, and lop off the last part,
+so that . matches that &#39;directory&#39; and not name of the baseName&#39;s
+module. For instance, baseName of &#39;one/two/three&#39;, maps to
+&#39;one/two/three.js&#39;, but we want the directory, &#39;one/two&#39; for
+this normalization.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        normalizedBaseParts = baseParts.slice(<span class="number">0</span>, baseParts.length - <span class="number">1</span>);
+                    }
+
+                    name = normalizedBaseParts.concat(name.split(<span class="string">'/'</span>));
+                    trimDots(name);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Some use of packages may use a . path to reference the
+&#39;main&#39; module name, so normalize for that.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    pkgConfig = getOwn(config.pkgs, (pkgName = name[<span class="number">0</span>]));
+                    name = name.join(<span class="string">'/'</span>);
+                    <span class="keyword">if</span> (pkgConfig &amp;&amp; name === pkgName + <span class="string">'/'</span> + pkgConfig.main) {
+                        name = pkgName;
+                    }
+                } <span class="keyword">else</span> <span class="keyword">if</span> (name.indexOf(<span class="string">'./'</span>) === <span class="number">0</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>No baseName, so this is ID is resolved relative
+to baseUrl, pull off the leading dot.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    name = name.substring(<span class="number">2</span>);
+                }
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Apply map config if available.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (applyMap &amp;&amp; map &amp;&amp; (baseParts || starMap)) {
+                nameParts = name.split(<span class="string">'/'</span>);
+
+                <span class="keyword">for</span> (i = nameParts.length; i &gt; <span class="number">0</span>; i -= <span class="number">1</span>) {
+                    nameSegment = nameParts.slice(<span class="number">0</span>, i).join(<span class="string">'/'</span>);
+
+                    <span class="keyword">if</span> (baseParts) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Find the longest baseName segment match in the config.
+So, do joins on the biggest to smallest lengths of baseParts.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">for</span> (j = baseParts.length; j &gt; <span class="number">0</span>; j -= <span class="number">1</span>) {
+                            mapValue = getOwn(map, baseParts.slice(<span class="number">0</span>, j).join(<span class="string">'/'</span>));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>baseName segment has config, find if it has one for
+this name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">if</span> (mapValue) {
+                                mapValue = getOwn(mapValue, nameSegment);
+                                <span class="keyword">if</span> (mapValue) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Match, update name to the new value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                                    foundMap = mapValue;
+                                    foundI = i;
+                                    <span class="keyword">break</span>;
+                                }
+                            }
+                        }
+                    }
+
+                    <span class="keyword">if</span> (foundMap) {
+                        <span class="keyword">break</span>;
+                    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Check for a star map match, but just hold on to it,
+if there is a shorter segment match later in a matching
+config, then favor over this star map.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (!foundStarMap &amp;&amp; starMap &amp;&amp; getOwn(starMap, nameSegment)) {
+                        foundStarMap = getOwn(starMap, nameSegment);
+                        starI = i;
+                    }
+                }
+
+                <span class="keyword">if</span> (!foundMap &amp;&amp; foundStarMap) {
+                    foundMap = foundStarMap;
+                    foundI = starI;
+                }
+
+                <span class="keyword">if</span> (foundMap) {
+                    nameParts.splice(<span class="number">0</span>, foundI, foundMap);
+                    name = nameParts.join(<span class="string">'/'</span>);
+                }
+            }
+
+            <span class="keyword">return</span> name;
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">removeScript</span><span class="params">(name)</span> {</span>
+            <span class="keyword">if</span> (isBrowser) {
+                each(scripts(), <span class="function"><span class="keyword">function</span> <span class="params">(scriptNode)</span> {</span>
+                    <span class="keyword">if</span> (scriptNode.getAttribute(<span class="string">'data-requiremodule'</span>) === name &amp;&amp;
+                            scriptNode.getAttribute(<span class="string">'data-requirecontext'</span>) === context.contextName) {
+                        scriptNode.parentNode.removeChild(scriptNode);
+                        <span class="keyword">return</span> <span class="literal">true</span>;
+                    }
+                });
+            }
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">hasPathFallback</span><span class="params">(id)</span> {</span>
+            <span class="keyword">var</span> pathConfig = getOwn(config.paths, id);
+            <span class="keyword">if</span> (pathConfig &amp;&amp; isArray(pathConfig) &amp;&amp; pathConfig.length &gt; <span class="number">1</span>) {
+                removeScript(id);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Pop off the first array value, since it failed, and
+retry</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                pathConfig.shift();
+                context.require.undef(id);
+                context.require([id]);
+                <span class="keyword">return</span> <span class="literal">true</span>;
+            }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Turns a plugin!resource to [plugin, resource]
+with the plugin being undefined if the name
+did not have a plugin prefix.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">splitPrefix</span><span class="params">(name)</span> {</span>
+            <span class="keyword">var</span> prefix,
+                index = name ? name.indexOf(<span class="string">'!'</span>) : -<span class="number">1</span>;
+            <span class="keyword">if</span> (index &gt; -<span class="number">1</span>) {
+                prefix = name.substring(<span class="number">0</span>, index);
+                name = name.substring(index + <span class="number">1</span>, name.length);
+            }
+            <span class="keyword">return</span> [prefix, name];
+        }
+
+        <span class="comment">/**
+         * Creates a module mapping that includes plugin prefix, module
+         * name, and path. If parentModuleMap is provided it will
+         * also normalize the name via require.normalize()
+         *
+         * @param {String} name the module name
+         * @param {String} [parentModuleMap] parent module map
+         * for the module name, used to resolve relative names.
+         * @param {Boolean} isNormalized: is the ID already normalized.
+         * This is true if this call is done for a define() module ID.
+         * @param {Boolean} applyMap: apply the map config to the ID.
+         * Should only be true if this map is for a dependency.
+         *
+         * @returns {Object}
+         */</span>
+        <span class="function"><span class="keyword">function</span> <span class="title">makeModuleMap</span><span class="params">(name, parentModuleMap, isNormalized, applyMap)</span> {</span>
+            <span class="keyword">var</span> url, pluginModule, suffix, nameParts,
+                prefix = <span class="literal">null</span>,
+                parentName = parentModuleMap ? parentModuleMap.name : <span class="literal">null</span>,
+                originalName = name,
+                isDefine = <span class="literal">true</span>,
+                normalizedName = <span class="string">''</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>If no name, then it means it is a require call, generate an
+internal name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (!name) {
+                isDefine = <span class="literal">false</span>;
+                name = <span class="string">'_@r'</span> + (requireCounter += <span class="number">1</span>);
+            }
+
+            nameParts = splitPrefix(name);
+            prefix = nameParts[<span class="number">0</span>];
+            name = nameParts[<span class="number">1</span>];
+
+            <span class="keyword">if</span> (prefix) {
+                prefix = normalize(prefix, parentName, applyMap);
+                pluginModule = getOwn(defined, prefix);
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Account for relative paths if there is a base name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (name) {
+                <span class="keyword">if</span> (prefix) {
+                    <span class="keyword">if</span> (pluginModule &amp;&amp; pluginModule.normalize) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Plugin is loaded, use its normalize method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        normalizedName = pluginModule.normalize(name, <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span>
+                            <span class="keyword">return</span> normalize(name, parentName, applyMap);
+                        });
+                    } <span class="keyword">else</span> {
+                        normalizedName = normalize(name, parentName, applyMap);
+                    }
+                } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>A regular module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    normalizedName = normalize(name, parentName, applyMap);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Normalized name may be a plugin ID due to map config
+application in normalize. The map config values must
+already be normalized, so do not need to redo that part.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    nameParts = splitPrefix(normalizedName);
+                    prefix = nameParts[<span class="number">0</span>];
+                    normalizedName = nameParts[<span class="number">1</span>];
+                    isNormalized = <span class="literal">true</span>;
+
+                    url = context.nameToUrl(normalizedName);
+                }
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>If the id is a plugin id that cannot be determined if it needs
+normalization, stamp it with a unique ID so two matching relative
+ids that may conflict can be separate.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            suffix = prefix &amp;&amp; !pluginModule &amp;&amp; !isNormalized ?
+                     <span class="string">'_unnormalized'</span> + (unnormalizedCounter += <span class="number">1</span>) :
+                     <span class="string">''</span>;
+
+            <span class="keyword">return</span> {
+                prefix: prefix,
+                name: normalizedName,
+                parentMap: parentModuleMap,
+                unnormalized: !!suffix,
+                url: url,
+                originalName: originalName,
+                isDefine: isDefine,
+                id: (prefix ?
+                        prefix + <span class="string">'!'</span> + normalizedName :
+                        normalizedName) + suffix
+            };
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">getModule</span><span class="params">(depMap)</span> {</span>
+            <span class="keyword">var</span> id = depMap.id,
+                mod = getOwn(registry, id);
+
+            <span class="keyword">if</span> (!mod) {
+                mod = registry[id] = <span class="keyword">new</span> context.Module(depMap);
+            }
+
+            <span class="keyword">return</span> mod;
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">(depMap, name, fn)</span> {</span>
+            <span class="keyword">var</span> id = depMap.id,
+                mod = getOwn(registry, id);
+
+            <span class="keyword">if</span> (hasProp(defined, id) &amp;&amp;
+                    (!mod || mod.defineEmitComplete)) {
+                <span class="keyword">if</span> (name === <span class="string">'defined'</span>) {
+                    fn(defined[id]);
+                }
+            } <span class="keyword">else</span> {
+                mod = getModule(depMap);
+                <span class="keyword">if</span> (mod.error &amp;&amp; name === <span class="string">'error'</span>) {
+                    fn(mod.error);
+                } <span class="keyword">else</span> {
+                    mod.on(name, fn);
+                }
+            }
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">onError</span><span class="params">(err, errback)</span> {</span>
+            <span class="keyword">var</span> ids = err.requireModules,
+                notified = <span class="literal">false</span>;
+
+            <span class="keyword">if</span> (errback) {
+                errback(err);
+            } <span class="keyword">else</span> {
+                each(ids, <span class="function"><span class="keyword">function</span> <span class="params">(id)</span> {</span>
+                    <span class="keyword">var</span> mod = getOwn(registry, id);
+                    <span class="keyword">if</span> (mod) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Set error on module, so it skips timeout checks.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        mod.error = err;
+                        <span class="keyword">if</span> (mod.events.error) {
+                            notified = <span class="literal">true</span>;
+                            mod.emit(<span class="string">'error'</span>, err);
+                        }
+                    }
+                });
+
+                <span class="keyword">if</span> (!notified) {
+                    req.onError(err);
+                }
+            }
+        }
+
+        <span class="comment">/**
+         * Internal method to transfer globalQueue items to this context's
+         * defQueue.
+         */</span>
+        <span class="function"><span class="keyword">function</span> <span class="title">takeGlobalQueue</span><span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Push all the globalDefQueue items into the context&#39;s defQueue</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (globalDefQueue.length) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Array splice in the values since the context code has a
+local var ref to defQueue, so cannot just reassign the one
+on context.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                apsp.apply(defQueue,
+                           [defQueue.length - <span class="number">1</span>, <span class="number">0</span>].concat(globalDefQueue));
+                globalDefQueue = [];
+            }
+        }
+
+        handlers = {
+            <span class="string">'require'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                <span class="keyword">if</span> (mod.require) {
+                    <span class="keyword">return</span> mod.require;
+                } <span class="keyword">else</span> {
+                    <span class="keyword">return</span> (mod.require = context.makeRequire(mod.map));
+                }
+            },
+            <span class="string">'exports'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                mod.usingExports = <span class="literal">true</span>;
+                <span class="keyword">if</span> (mod.map.isDefine) {
+                    <span class="keyword">if</span> (mod.exports) {
+                        <span class="keyword">return</span> mod.exports;
+                    } <span class="keyword">else</span> {
+                        <span class="keyword">return</span> (mod.exports = defined[mod.map.id] = {});
+                    }
+                }
+            },
+            <span class="string">'module'</span>: <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                <span class="keyword">if</span> (mod.module) {
+                    <span class="keyword">return</span> mod.module;
+                } <span class="keyword">else</span> {
+                    <span class="keyword">return</span> (mod.module = {
+                        id: mod.map.id,
+                        uri: mod.map.url,
+                        config: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                            <span class="keyword">var</span> c,
+                                pkg = getOwn(config.pkgs, mod.map.id);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>For packages, only support config targeted
+at the main module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            c = pkg ? getOwn(config.config, mod.map.id + <span class="string">'/'</span> + pkg.main) :
+                                      getOwn(config.config, mod.map.id);
+                            <span class="keyword">return</span>  c || {};
+                        },
+                        exports: defined[mod.map.id]
+                    });
+                }
+            }
+        };
+
+        <span class="function"><span class="keyword">function</span> <span class="title">cleanRegistry</span><span class="params">(id)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Clean up machinery used for waiting modules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">delete</span> registry[id];
+            <span class="keyword">delete</span> enabledRegistry[id];
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">breakCycle</span><span class="params">(mod, traced, processed)</span> {</span>
+            <span class="keyword">var</span> id = mod.map.id;
+
+            <span class="keyword">if</span> (mod.error) {
+                mod.emit(<span class="string">'error'</span>, mod.error);
+            } <span class="keyword">else</span> {
+                traced[id] = <span class="literal">true</span>;
+                each(mod.depMaps, <span class="function"><span class="keyword">function</span> <span class="params">(depMap, i)</span> {</span>
+                    <span class="keyword">var</span> depId = depMap.id,
+                        dep = getOwn(registry, depId);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>Only force things that have not completed
+being defined, so still in the registry,
+and only if it has not been matched up
+in the module already.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (dep &amp;&amp; !mod.depMatched[i] &amp;&amp; !processed[depId]) {
+                        <span class="keyword">if</span> (getOwn(traced, depId)) {
+                            mod.defineDep(i, defined[depId]);
+                            mod.check(); <span class="comment">//pass false?</span>
+                        } <span class="keyword">else</span> {
+                            breakCycle(dep, traced, processed);
+                        }
+                    }
+                });
+                processed[id] = <span class="literal">true</span>;
+            }
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">checkLoaded</span><span class="params">()</span> {</span>
+            <span class="keyword">var</span> map, modId, err, usingPathFallback,
+                waitInterval = config.waitSeconds * <span class="number">1000</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>It is possible to disable the wait interval by using waitSeconds of 0.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                expired = waitInterval &amp;&amp; (context.startTime + waitInterval) &lt; <span class="keyword">new</span> Date().getTime(),
+                noLoads = [],
+                reqCalls = [],
+                stillLoading = <span class="literal">false</span>,
+                needCycleCheck = <span class="literal">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>Do not bother if this call was a result of a cycle break.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (inCheckLoaded) {
+                <span class="keyword">return</span>;
+            }
+
+            inCheckLoaded = <span class="literal">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>Figure out the state of all the modules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            eachProp(enabledRegistry, <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                map = mod.map;
+                modId = map.id;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Skip things that are not enabled or in error state.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!mod.enabled) {
+                    <span class="keyword">return</span>;
+                }
+
+                <span class="keyword">if</span> (!map.isDefine) {
+                    reqCalls.push(mod);
+                }
+
+                <span class="keyword">if</span> (!mod.error) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>If the module should be executed, and it has not
+been inited and time is up, remember it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (!mod.inited &amp;&amp; expired) {
+                        <span class="keyword">if</span> (hasPathFallback(modId)) {
+                            usingPathFallback = <span class="literal">true</span>;
+                            stillLoading = <span class="literal">true</span>;
+                        } <span class="keyword">else</span> {
+                            noLoads.push(modId);
+                            removeScript(modId);
+                        }
+                    } <span class="keyword">else</span> <span class="keyword">if</span> (!mod.inited &amp;&amp; mod.fetched &amp;&amp; map.isDefine) {
+                        stillLoading = <span class="literal">true</span>;
+                        <span class="keyword">if</span> (!map.prefix) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>No reason to keep looking for unfinished
+loading. If the only stillLoading is a
+plugin resource though, keep going,
+because it may be that a plugin resource
+is waiting on a non-plugin cycle.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">return</span> (needCycleCheck = <span class="literal">false</span>);
+                        }
+                    }
+                }
+            });
+
+            <span class="keyword">if</span> (expired &amp;&amp; noLoads.length) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>If wait time expired, throw error of unloaded modules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                err = makeError(<span class="string">'timeout'</span>, <span class="string">'Load timeout for modules: '</span> + noLoads, <span class="literal">null</span>, noLoads);
+                err.contextName = context.contextName;
+                <span class="keyword">return</span> onError(err);
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>Not expired, check for a cycle.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (needCycleCheck) {
+                each(reqCalls, <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                    breakCycle(mod, {}, {});
+                });
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>If still waiting on loads, and the waiting load is something
+other than a plugin resource, or there are still outstanding
+scripts, then just try back later.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> ((!expired || usingPathFallback) &amp;&amp; stillLoading) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Something is still waiting to load. Wait for it, but only
+if a timeout is not already in effect.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> ((isBrowser || isWebWorker) &amp;&amp; !checkLoadedTimeoutId) {
+                    checkLoadedTimeoutId = setTimeout(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                        checkLoadedTimeoutId = <span class="number">0</span>;
+                        checkLoaded();
+                    }, <span class="number">50</span>);
+                }
+            }
+
+            inCheckLoaded = <span class="literal">false</span>;
+        }
+
+        Module = <span class="function"><span class="keyword">function</span> <span class="params">(map)</span> {</span>
+            <span class="keyword">this</span>.events = getOwn(undefEvents, map.id) || {};
+            <span class="keyword">this</span>.map = map;
+            <span class="keyword">this</span>.shim = getOwn(config.shim, map.id);
+            <span class="keyword">this</span>.depExports = [];
+            <span class="keyword">this</span>.depMaps = [];
+            <span class="keyword">this</span>.depMatched = [];
+            <span class="keyword">this</span>.pluginMaps = {};
+            <span class="keyword">this</span>.depCount = <span class="number">0</span>;
+
+            <span class="comment">/* this.exports this.factory
+               this.depMaps = [],
+               this.enabled, this.fetched
+            */</span>
+        };
+
+        Module.prototype = {
+            init: <span class="function"><span class="keyword">function</span> <span class="params">(depMaps, factory, errback, options)</span> {</span>
+                options = options || {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>Do not do more inits if already done. Can happen if there
+are multiple define calls for the same module. That is not
+a normal, common case, but it is also not unexpected.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (<span class="keyword">this</span>.inited) {
+                    <span class="keyword">return</span>;
+                }
+
+                <span class="keyword">this</span>.factory = factory;
+
+                <span class="keyword">if</span> (errback) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Register for errors on this module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">this</span>.on(<span class="string">'error'</span>, errback);
+                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.events.error) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>If no errback already, but there are error listeners
+on this module, set up an errback to pass to the deps.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    errback = bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(err)</span> {</span>
+                        <span class="keyword">this</span>.emit(<span class="string">'error'</span>, err);
+                    });
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>Do a copy of the dependency array, so that
+source inputs are not modified. For example
+&quot;shim&quot; deps are passed in here directly, and
+doing a direct modification of the depMaps array
+would affect that config.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">this</span>.depMaps = depMaps &amp;&amp; depMaps.slice(<span class="number">0</span>);
+
+                <span class="keyword">this</span>.errback = errback;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>Indicate this module has be initialized</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">this</span>.inited = <span class="literal">true</span>;
+
+                <span class="keyword">this</span>.ignore = options.ignore;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>Could have option to init this module in enabled mode,
+or could have been previously marked as enabled. However,
+the dependencies are not known until init is called. So
+if enabled previously, now trigger dependencies as enabled.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (options.enabled || <span class="keyword">this</span>.enabled) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>Enable this module and dependencies.
+Will call this.check()</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">this</span>.enable();
+                } <span class="keyword">else</span> {
+                    <span class="keyword">this</span>.check();
+                }
+            },
+
+            defineDep: <span class="function"><span class="keyword">function</span> <span class="params">(i, depExports)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>Because of cycles, defined callback for a given
+export can be called more than once.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!<span class="keyword">this</span>.depMatched[i]) {
+                    <span class="keyword">this</span>.depMatched[i] = <span class="literal">true</span>;
+                    <span class="keyword">this</span>.depCount -= <span class="number">1</span>;
+                    <span class="keyword">this</span>.depExports[i] = depExports;
+                }
+            },
+
+            fetch: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                <span class="keyword">if</span> (<span class="keyword">this</span>.fetched) {
+                    <span class="keyword">return</span>;
+                }
+                <span class="keyword">this</span>.fetched = <span class="literal">true</span>;
+
+                context.startTime = (<span class="keyword">new</span> Date()).getTime();
+
+                <span class="keyword">var</span> map = <span class="keyword">this</span>.map;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>If the manager is for a plugin managed resource,
+ask the plugin to load it now.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (<span class="keyword">this</span>.shim) {
+                    context.makeRequire(<span class="keyword">this</span>.map, {
+                        enableBuildCallback: <span class="literal">true</span>
+                    })(<span class="keyword">this</span>.shim.deps || [], bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                        <span class="keyword">return</span> map.prefix ? <span class="keyword">this</span>.callPlugin() : <span class="keyword">this</span>.load();
+                    }));
+                } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>Regular dependency.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">return</span> map.prefix ? <span class="keyword">this</span>.callPlugin() : <span class="keyword">this</span>.load();
+                }
+            },
+
+            load: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                <span class="keyword">var</span> url = <span class="keyword">this</span>.map.url;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Regular dependency.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!urlFetched[url]) {
+                    urlFetched[url] = <span class="literal">true</span>;
+                    context.load(<span class="keyword">this</span>.map.id, url);
+                }
+            },
+
+            <span class="comment">/**
+             * Checks if the module is ready to define itself, and if so,
+             * define it.
+             */</span>
+            check: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                <span class="keyword">if</span> (!<span class="keyword">this</span>.enabled || <span class="keyword">this</span>.enabling) {
+                    <span class="keyword">return</span>;
+                }
+
+                <span class="keyword">var</span> err, cjsModule,
+                    id = <span class="keyword">this</span>.map.id,
+                    depExports = <span class="keyword">this</span>.depExports,
+                    exports = <span class="keyword">this</span>.exports,
+                    factory = <span class="keyword">this</span>.factory;
+
+                <span class="keyword">if</span> (!<span class="keyword">this</span>.inited) {
+                    <span class="keyword">this</span>.fetch();
+                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.error) {
+                    <span class="keyword">this</span>.emit(<span class="string">'error'</span>, <span class="keyword">this</span>.error);
+                } <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="keyword">this</span>.defining) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>The factory could trigger another require call
+that would result in checking this module to
+define itself again. If already in the process
+of doing that, skip this work.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">this</span>.defining = <span class="literal">true</span>;
+
+                    <span class="keyword">if</span> (<span class="keyword">this</span>.depCount &lt; <span class="number">1</span> &amp;&amp; !<span class="keyword">this</span>.defined) {
+                        <span class="keyword">if</span> (isFunction(factory)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>If there is an error listener, favor passing
+to that instead of throwing an error. However,
+only do it for define()&#39;d  modules. require
+errbacks should not be called for failures in
+their callbacks (#699). However if a global
+onError is set, use that.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">if</span> ((<span class="keyword">this</span>.events.error &amp;&amp; <span class="keyword">this</span>.map.isDefine) ||
+                                req.onError !== defaultOnError) {
+                                <span class="keyword">try</span> {
+                                    exports = context.execCb(id, factory, depExports, exports);
+                                } <span class="keyword">catch</span> (e) {
+                                    err = e;
+                                }
+                            } <span class="keyword">else</span> {
+                                exports = context.execCb(id, factory, depExports, exports);
+                            }
+
+                            <span class="keyword">if</span> (<span class="keyword">this</span>.map.isDefine) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>If setting exports via &#39;module&#39; is in play,
+favor that over return value and exports. After that,
+favor a non-undefined return value over exports use.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                                cjsModule = <span class="keyword">this</span>.module;
+                                <span class="keyword">if</span> (cjsModule &amp;&amp;
+                                        cjsModule.exports !== <span class="literal">undefined</span> &amp;&amp;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>Make sure it is not already the exports value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                                        cjsModule.exports !== <span class="keyword">this</span>.exports) {
+                                    exports = cjsModule.exports;
+                                } <span class="keyword">else</span> <span class="keyword">if</span> (exports === <span class="literal">undefined</span> &amp;&amp; <span class="keyword">this</span>.usingExports) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>exports already set the defined value.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                                    exports = <span class="keyword">this</span>.exports;
+                                }
+                            }
+
+                            <span class="keyword">if</span> (err) {
+                                err.requireMap = <span class="keyword">this</span>.map;
+                                err.requireModules = <span class="keyword">this</span>.map.isDefine ? [<span class="keyword">this</span>.map.id] : <span class="literal">null</span>;
+                                err.requireType = <span class="keyword">this</span>.map.isDefine ? <span class="string">'define'</span> : <span class="string">'require'</span>;
+                                <span class="keyword">return</span> onError((<span class="keyword">this</span>.error = err));
+                            }
+
+                        } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>Just a literal value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            exports = factory;
+                        }
+
+                        <span class="keyword">this</span>.exports = exports;
+
+                        <span class="keyword">if</span> (<span class="keyword">this</span>.map.isDefine &amp;&amp; !<span class="keyword">this</span>.ignore) {
+                            defined[id] = exports;
+
+                            <span class="keyword">if</span> (req.onResourceLoad) {
+                                req.onResourceLoad(context, <span class="keyword">this</span>.map, <span class="keyword">this</span>.depMaps);
+                            }
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>Clean up</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        cleanRegistry(id);
+
+                        <span class="keyword">this</span>.defined = <span class="literal">true</span>;
+                    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>Finished the define stage. Allow calling check again
+to allow define notifications below in the case of a
+cycle.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">this</span>.defining = <span class="literal">false</span>;
+
+                    <span class="keyword">if</span> (<span class="keyword">this</span>.defined &amp;&amp; !<span class="keyword">this</span>.defineEmitted) {
+                        <span class="keyword">this</span>.defineEmitted = <span class="literal">true</span>;
+                        <span class="keyword">this</span>.emit(<span class="string">'defined'</span>, <span class="keyword">this</span>.exports);
+                        <span class="keyword">this</span>.defineEmitComplete = <span class="literal">true</span>;
+                    }
+
+                }
+            },
+
+            callPlugin: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                <span class="keyword">var</span> map = <span class="keyword">this</span>.map,
+                    id = map.id,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>Map already normalized the prefix.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    pluginMap = makeModuleMap(map.prefix);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>Mark this as a dependency for this plugin, so it
+can be traced for cycles.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">this</span>.depMaps.push(pluginMap);
+
+                on(pluginMap, <span class="string">'defined'</span>, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(plugin)</span> {</span>
+                    <span class="keyword">var</span> load, normalizedMap, normalizedMod,
+                        name = <span class="keyword">this</span>.map.name,
+                        parentName = <span class="keyword">this</span>.map.parentMap ? <span class="keyword">this</span>.map.parentMap.name : <span class="literal">null</span>,
+                        localRequire = context.makeRequire(map.parentMap, {
+                            enableBuildCallback: <span class="literal">true</span>
+                        });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>If current map is not normalized, wait for that
+normalized name to load instead of continuing.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (<span class="keyword">this</span>.map.unnormalized) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>Normalize the ID if the plugin allows it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (plugin.normalize) {
+                            name = plugin.normalize(name, <span class="function"><span class="keyword">function</span> <span class="params">(name)</span> {</span>
+                                <span class="keyword">return</span> normalize(name, parentName, <span class="literal">true</span>);
+                            }) || <span class="string">''</span>;
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>prefix and name should already be normalized, no need
+for applying map config again either.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        normalizedMap = makeModuleMap(map.prefix + <span class="string">'!'</span> + name,
+                                                      <span class="keyword">this</span>.map.parentMap);
+                        on(normalizedMap,
+                            <span class="string">'defined'</span>, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(value)</span> {</span>
+                                <span class="keyword">this</span>.init([], <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> value; }, <span class="literal">null</span>, {
+                                    enabled: <span class="literal">true</span>,
+                                    ignore: <span class="literal">true</span>
+                                });
+                            }));
+
+                        normalizedMod = getOwn(registry, normalizedMap.id);
+                        <span class="keyword">if</span> (normalizedMod) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>Mark this as a dependency for this plugin, so it
+can be traced for cycles.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">this</span>.depMaps.push(normalizedMap);
+
+                            <span class="keyword">if</span> (<span class="keyword">this</span>.events.error) {
+                                normalizedMod.on(<span class="string">'error'</span>, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(err)</span> {</span>
+                                    <span class="keyword">this</span>.emit(<span class="string">'error'</span>, err);
+                                }));
+                            }
+                            normalizedMod.enable();
+                        }
+
+                        <span class="keyword">return</span>;
+                    }
+
+                    load = bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(value)</span> {</span>
+                        <span class="keyword">this</span>.init([], <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span> <span class="keyword">return</span> value; }, <span class="literal">null</span>, {
+                            enabled: <span class="literal">true</span>
+                        });
+                    });
+
+                    load.error = bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(err)</span> {</span>
+                        <span class="keyword">this</span>.inited = <span class="literal">true</span>;
+                        <span class="keyword">this</span>.error = err;
+                        err.requireModules = [id];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>Remove temp unnormalized modules for this module,
+since they will never be resolved otherwise now.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        eachProp(registry, <span class="function"><span class="keyword">function</span> <span class="params">(mod)</span> {</span>
+                            <span class="keyword">if</span> (mod.map.id.indexOf(id + <span class="string">'_unnormalized'</span>) === <span class="number">0</span>) {
+                                cleanRegistry(mod.map.id);
+                            }
+                        });
+
+                        onError(err);
+                    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>Allow plugins to load other code without having to know the
+context or how to &#39;complete&#39; the load.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    load.fromText = bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(text, textAlt)</span> {</span>
+                        <span class="comment">/*jslint evil: true */</span>
+                        <span class="keyword">var</span> moduleName = map.name,
+                            moduleMap = makeModuleMap(moduleName),
+                            hasInteractive = useInteractive;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>As of 2.1.0, support just passing the text, to reinforce
+fromText only being called once per resource. Still
+support old style of passing moduleName but discard
+that moduleName in favor of the internal ref.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (textAlt) {
+                            text = textAlt;
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>Turn off interactive script matching for IE for any define
+calls in the text, then turn it back on at the end.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (hasInteractive) {
+                            useInteractive = <span class="literal">false</span>;
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>Prime the system by creating a module instance for
+it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        getModule(moduleMap);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>Transfer any config to this other module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (hasProp(config.config, id)) {
+                            config.config[moduleName] = config.config[id];
+                        }
+
+                        <span class="keyword">try</span> {
+                            req.exec(text);
+                        } <span class="keyword">catch</span> (e) {
+                            <span class="keyword">return</span> onError(makeError(<span class="string">'fromtexteval'</span>,
+                                             <span class="string">'fromText eval for '</span> + id +
+                                            <span class="string">' failed: '</span> + e,
+                                             e,
+                                             [id]));
+                        }
+
+                        <span class="keyword">if</span> (hasInteractive) {
+                            useInteractive = <span class="literal">true</span>;
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>Mark this as a dependency for the plugin
+resource</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">this</span>.depMaps.push(moduleMap);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>Support anonymous modules.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        context.completeLoad(moduleName);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>Bind the value of that module to the value for this
+resource ID.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        localRequire([moduleName], load);
+                    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>Use parentName here since the plugin&#39;s name is not reliable,
+could be some weird string with no path that actually wants to
+reference the parentName&#39;s path.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    plugin.load(map.name, localRequire, load, config);
+                }));
+
+                context.enable(pluginMap, <span class="keyword">this</span>);
+                <span class="keyword">this</span>.pluginMaps[pluginMap.id] = pluginMap;
+            },
+
+            enable: <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                enabledRegistry[<span class="keyword">this</span>.map.id] = <span class="keyword">this</span>;
+                <span class="keyword">this</span>.enabled = <span class="literal">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>Set flag mentioning that the module is enabling,
+so that immediate calls to the defined callbacks
+for dependencies do not trigger inadvertent load
+with the depCount still being zero.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">this</span>.enabling = <span class="literal">true</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>Enable each dependency</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                each(<span class="keyword">this</span>.depMaps, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(depMap, i)</span> {</span>
+                    <span class="keyword">var</span> id, mod, handler;
+
+                    <span class="keyword">if</span> (<span class="keyword">typeof</span> depMap === <span class="string">'string'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>Dependency needs to be converted to a depMap
+and wired up to this module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        depMap = makeModuleMap(depMap,
+                                               (<span class="keyword">this</span>.map.isDefine ? <span class="keyword">this</span>.map : <span class="keyword">this</span>.map.parentMap),
+                                               <span class="literal">false</span>,
+                                               !<span class="keyword">this</span>.skipMap);
+                        <span class="keyword">this</span>.depMaps[i] = depMap;
+
+                        handler = getOwn(handlers, depMap.id);
+
+                        <span class="keyword">if</span> (handler) {
+                            <span class="keyword">this</span>.depExports[i] = handler(<span class="keyword">this</span>);
+                            <span class="keyword">return</span>;
+                        }
+
+                        <span class="keyword">this</span>.depCount += <span class="number">1</span>;
+
+                        on(depMap, <span class="string">'defined'</span>, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(depExports)</span> {</span>
+                            <span class="keyword">this</span>.defineDep(i, depExports);
+                            <span class="keyword">this</span>.check();
+                        }));
+
+                        <span class="keyword">if</span> (<span class="keyword">this</span>.errback) {
+                            on(depMap, <span class="string">'error'</span>, bind(<span class="keyword">this</span>, <span class="keyword">this</span>.errback));
+                        }
+                    }
+
+                    id = depMap.id;
+                    mod = registry[id];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>Skip special modules like &#39;require&#39;, &#39;exports&#39;, &#39;module&#39;
+Also, don&#39;t call enable if it is already enabled,
+important in circular dependency cases.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (!hasProp(handlers, id) &amp;&amp; mod &amp;&amp; !mod.enabled) {
+                        context.enable(depMap, <span class="keyword">this</span>);
+                    }
+                }));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>Enable each plugin that is used in
+a dependency</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                eachProp(<span class="keyword">this</span>.pluginMaps, bind(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(pluginMap)</span> {</span>
+                    <span class="keyword">var</span> mod = getOwn(registry, pluginMap.id);
+                    <span class="keyword">if</span> (mod &amp;&amp; !mod.enabled) {
+                        context.enable(pluginMap, <span class="keyword">this</span>);
+                    }
+                }));
+
+                <span class="keyword">this</span>.enabling = <span class="literal">false</span>;
+
+                <span class="keyword">this</span>.check();
+            },
+
+            on: <span class="function"><span class="keyword">function</span> <span class="params">(name, cb)</span> {</span>
+                <span class="keyword">var</span> cbs = <span class="keyword">this</span>.events[name];
+                <span class="keyword">if</span> (!cbs) {
+                    cbs = <span class="keyword">this</span>.events[name] = [];
+                }
+                cbs.push(cb);
+            },
+
+            emit: <span class="function"><span class="keyword">function</span> <span class="params">(name, evt)</span> {</span>
+                each(<span class="keyword">this</span>.events[name], <span class="function"><span class="keyword">function</span> <span class="params">(cb)</span> {</span>
+                    cb(evt);
+                });
+                <span class="keyword">if</span> (name === <span class="string">'error'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>Now that the error handler was triggered, remove
+the listeners, since this broken Module instance
+can stay around for a while in the registry.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">delete</span> <span class="keyword">this</span>.events[name];
+                }
+            }
+        };
+
+        <span class="function"><span class="keyword">function</span> <span class="title">callGetModule</span><span class="params">(args)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>Skip modules already defined.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (!hasProp(defined, args[<span class="number">0</span>])) {
+                getModule(makeModuleMap(args[<span class="number">0</span>], <span class="literal">null</span>, <span class="literal">true</span>)).init(args[<span class="number">1</span>], args[<span class="number">2</span>]);
+            }
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">removeListener</span><span class="params">(node, func, name, ieName)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>Favor detachEvent because of IE9
+issue, see attachEvent/addEventListener comment elsewhere
+in this file.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (node.detachEvent &amp;&amp; !isOpera) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>Probably IE. If not it will throw an error, which will be
+useful to know.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (ieName) {
+                    node.detachEvent(ieName, func);
+                }
+            } <span class="keyword">else</span> {
+                node.removeEventListener(name, func, <span class="literal">false</span>);
+            }
+        }
+
+        <span class="comment">/**
+         * Given an event from a script node, get the requirejs info from it,
+         * and then removes the event listeners on the node.
+         * @param {Event} evt
+         * @returns {Object}
+         */</span>
+        <span class="function"><span class="keyword">function</span> <span class="title">getScriptData</span><span class="params">(evt)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p>Using currentTarget instead of target for Firefox 2.0&#39;s sake. Not
+all old browsers will be supported, but this one was easy enough
+to support and still makes sense.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> node = evt.currentTarget || evt.srcElement;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>Remove the listeners once here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            removeListener(node, context.onScriptLoad, <span class="string">'load'</span>, <span class="string">'onreadystatechange'</span>);
+            removeListener(node, context.onScriptError, <span class="string">'error'</span>);
+
+            <span class="keyword">return</span> {
+                node: node,
+                id: node &amp;&amp; node.getAttribute(<span class="string">'data-requiremodule'</span>)
+            };
+        }
+
+        <span class="function"><span class="keyword">function</span> <span class="title">intakeDefines</span><span class="params">()</span> {</span>
+            <span class="keyword">var</span> args;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>Any defined modules in the global queue, intake them now.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            takeGlobalQueue();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p>Make sure any remaining defQueue items get properly processed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">while</span> (defQueue.length) {
+                args = defQueue.shift();
+                <span class="keyword">if</span> (args[<span class="number">0</span>] === <span class="literal">null</span>) {
+                    <span class="keyword">return</span> onError(makeError(<span class="string">'mismatch'</span>, <span class="string">'Mismatched anonymous define() module: '</span> + args[args.length - <span class="number">1</span>]));
+                } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-97">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-97">&#182;</a>
+              </div>
+              <p>args are id, deps, factory. Should be normalized by the
+define() function.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    callGetModule(args);
+                }
+            }
+        }
+
+        context = {
+            config: config,
+            contextName: contextName,
+            registry: registry,
+            defined: defined,
+            urlFetched: urlFetched,
+            defQueue: defQueue,
+            Module: Module,
+            makeModuleMap: makeModuleMap,
+            nextTick: req.nextTick,
+            onError: onError,
+
+            <span class="comment">/**
+             * Set a configuration for the context.
+             * @param {Object} cfg config object to integrate.
+             */</span>
+            configure: <span class="function"><span class="keyword">function</span> <span class="params">(cfg)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-98">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-98">&#182;</a>
+              </div>
+              <p>Make sure the baseUrl ends in a slash.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (cfg.baseUrl) {
+                    <span class="keyword">if</span> (cfg.baseUrl.charAt(cfg.baseUrl.length - <span class="number">1</span>) !== <span class="string">'/'</span>) {
+                        cfg.baseUrl += <span class="string">'/'</span>;
+                    }
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-99">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-99">&#182;</a>
+              </div>
+              <p>Save off the paths and packages since they require special processing,
+they are additive.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">var</span> pkgs = config.pkgs,
+                    shim = config.shim,
+                    objs = {
+                        paths: <span class="literal">true</span>,
+                        config: <span class="literal">true</span>,
+                        map: <span class="literal">true</span>
+                    };
+
+                eachProp(cfg, <span class="function"><span class="keyword">function</span> <span class="params">(value, prop)</span> {</span>
+                    <span class="keyword">if</span> (objs[prop]) {
+                        <span class="keyword">if</span> (prop === <span class="string">'map'</span>) {
+                            <span class="keyword">if</span> (!config.map) {
+                                config.map = {};
+                            }
+                            mixin(config[prop], value, <span class="literal">true</span>, <span class="literal">true</span>);
+                        } <span class="keyword">else</span> {
+                            mixin(config[prop], value, <span class="literal">true</span>);
+                        }
+                    } <span class="keyword">else</span> {
+                        config[prop] = value;
+                    }
+                });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-100">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-100">&#182;</a>
+              </div>
+              <p>Merge shim</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (cfg.shim) {
+                    eachProp(cfg.shim, <span class="function"><span class="keyword">function</span> <span class="params">(value, id)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-101">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-101">&#182;</a>
+              </div>
+              <p>Normalize the structure</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (isArray(value)) {
+                            value = {
+                                deps: value
+                            };
+                        }
+                        <span class="keyword">if</span> ((value.exports || value.init) &amp;&amp; !value.exportsFn) {
+                            value.exportsFn = context.makeShimExports(value);
+                        }
+                        shim[id] = value;
+                    });
+                    config.shim = shim;
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-102">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-102">&#182;</a>
+              </div>
+              <p>Adjust packages if necessary.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (cfg.packages) {
+                    each(cfg.packages, <span class="function"><span class="keyword">function</span> <span class="params">(pkgObj)</span> {</span>
+                        <span class="keyword">var</span> location;
+
+                        pkgObj = <span class="keyword">typeof</span> pkgObj === <span class="string">'string'</span> ? { name: pkgObj } : pkgObj;
+                        location = pkgObj.location;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-103">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-103">&#182;</a>
+              </div>
+              <p>Create a brand new object on pkgs, since currentPackages can
+be passed in again, and config.pkgs is the internal transformed
+state for all package configs.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        pkgs[pkgObj.name] = {
+                            name: pkgObj.name,
+                            location: location || pkgObj.name,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-104">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-104">&#182;</a>
+              </div>
+              <p>Remove leading dot in main, so main paths are normalized,
+and remove any trailing .js, since different package
+envs have different conventions: some use a module name,
+some use a file name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            main: (pkgObj.main || <span class="string">'main'</span>)
+                                  .replace(currDirRegExp, <span class="string">''</span>)
+                                  .replace(jsSuffixRegExp, <span class="string">''</span>)
+                        };
+                    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-105">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-105">&#182;</a>
+              </div>
+              <p>Done with modifications, assing packages back to context config</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    config.pkgs = pkgs;
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-106">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-106">&#182;</a>
+              </div>
+              <p>If there are any &quot;waiting to execute&quot; modules in the registry,
+update the maps for them, since their info, like URLs to load,
+may have changed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                eachProp(registry, <span class="function"><span class="keyword">function</span> <span class="params">(mod, id)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-107">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-107">&#182;</a>
+              </div>
+              <p>If module already has init called, since it is too
+late to modify them, and ignore unnormalized ones
+since they are transient.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">if</span> (!mod.inited &amp;&amp; !mod.map.unnormalized) {
+                        mod.map = makeModuleMap(id);
+                    }
+                });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-108">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-108">&#182;</a>
+              </div>
+              <p>If a deps array or a config callback is specified, then call
+require with those args. This is useful when require is defined as a
+config object before require.js is loaded.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (cfg.deps || cfg.callback) {
+                    context.require(cfg.deps || [], cfg.callback);
+                }
+            },
+
+            makeShimExports: <span class="function"><span class="keyword">function</span> <span class="params">(value)</span> {</span>
+                <span class="function"><span class="keyword">function</span> <span class="title">fn</span><span class="params">()</span> {</span>
+                    <span class="keyword">var</span> ret;
+                    <span class="keyword">if</span> (value.init) {
+                        ret = value.init.apply(global, arguments);
+                    }
+                    <span class="keyword">return</span> ret || (value.exports &amp;&amp; getGlobal(value.exports));
+                }
+                <span class="keyword">return</span> fn;
+            },
+
+            makeRequire: <span class="function"><span class="keyword">function</span> <span class="params">(relMap, options)</span> {</span>
+                options = options || {};
+
+                <span class="function"><span class="keyword">function</span> <span class="title">localRequire</span><span class="params">(deps, callback, errback)</span> {</span>
+                    <span class="keyword">var</span> id, map, requireMod;
+
+                    <span class="keyword">if</span> (options.enableBuildCallback &amp;&amp; callback &amp;&amp; isFunction(callback)) {
+                        callback.__requireJsBuild = <span class="literal">true</span>;
+                    }
+
+                    <span class="keyword">if</span> (<span class="keyword">typeof</span> deps === <span class="string">'string'</span>) {
+                        <span class="keyword">if</span> (isFunction(callback)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-109">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-109">&#182;</a>
+              </div>
+              <p>Invalid call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">return</span> onError(makeError(<span class="string">'requireargs'</span>, <span class="string">'Invalid require call'</span>), errback);
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-110">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-110">&#182;</a>
+              </div>
+              <p>If require|exports|module are requested, get the
+value for them from the special handlers. Caveat:
+this only works while module is being defined.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (relMap &amp;&amp; hasProp(handlers, deps)) {
+                            <span class="keyword">return</span> handlers[deps](registry[relMap.id]);
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-111">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-111">&#182;</a>
+              </div>
+              <p>Synchronous access to one module. If require.get is
+available (as in the Node adapter), prefer that.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (req.get) {
+                            <span class="keyword">return</span> req.get(context, deps, relMap, localRequire);
+                        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-112">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-112">&#182;</a>
+              </div>
+              <p>Normalize module name, if it contains . or ..</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        map = makeModuleMap(deps, relMap, <span class="literal">false</span>, <span class="literal">true</span>);
+                        id = map.id;
+
+                        <span class="keyword">if</span> (!hasProp(defined, id)) {
+                            <span class="keyword">return</span> onError(makeError(<span class="string">'notloaded'</span>, <span class="string">'Module name "'</span> +
+                                        id +
+                                        <span class="string">'" has not been loaded yet for context: '</span> +
+                                        contextName +
+                                        (relMap ? <span class="string">''</span> : <span class="string">'. Use require([])'</span>)));
+                        }
+                        <span class="keyword">return</span> defined[id];
+                    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-113">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-113">&#182;</a>
+              </div>
+              <p>Grab defines waiting in the global queue.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    intakeDefines();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-114">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-114">&#182;</a>
+              </div>
+              <p>Mark all the dependencies as needing to be loaded.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    context.nextTick(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-115">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-115">&#182;</a>
+              </div>
+              <p>Some defines could have been added since the
+require call, collect them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        intakeDefines();
+
+                        requireMod = getModule(makeModuleMap(<span class="literal">null</span>, relMap));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-116">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-116">&#182;</a>
+              </div>
+              <p>Store if map config should be applied to this require
+call for dependencies.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        requireMod.skipMap = options.skipMap;
+
+                        requireMod.init(deps, callback, errback, {
+                            enabled: <span class="literal">true</span>
+                        });
+
+                        checkLoaded();
+                    });
+
+                    <span class="keyword">return</span> localRequire;
+                }
+
+                mixin(localRequire, {
+                    isBrowser: isBrowser,
+
+                    <span class="comment">/**
+                     * Converts a module name + .extension into an URL path.
+                     * *Requires* the use of a module name. It does not support using
+                     * plain URLs like nameToUrl.
+                     */</span>
+                    toUrl: <span class="function"><span class="keyword">function</span> <span class="params">(moduleNamePlusExt)</span> {</span>
+                        <span class="keyword">var</span> ext,
+                            index = moduleNamePlusExt.lastIndexOf(<span class="string">'.'</span>),
+                            segment = moduleNamePlusExt.split(<span class="string">'/'</span>)[<span class="number">0</span>],
+                            isRelative = segment === <span class="string">'.'</span> || segment === <span class="string">'..'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-117">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-117">&#182;</a>
+              </div>
+              <p>Have a file extension alias, and it is not the
+dots from a relative path.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (index !== -<span class="number">1</span> &amp;&amp; (!isRelative || index &gt; <span class="number">1</span>)) {
+                            ext = moduleNamePlusExt.substring(index, moduleNamePlusExt.length);
+                            moduleNamePlusExt = moduleNamePlusExt.substring(<span class="number">0</span>, index);
+                        }
+
+                        <span class="keyword">return</span> context.nameToUrl(normalize(moduleNamePlusExt,
+                                                relMap &amp;&amp; relMap.id, <span class="literal">true</span>), ext,  <span class="literal">true</span>);
+                    },
+
+                    defined: <span class="function"><span class="keyword">function</span> <span class="params">(id)</span> {</span>
+                        <span class="keyword">return</span> hasProp(defined, makeModuleMap(id, relMap, <span class="literal">false</span>, <span class="literal">true</span>).id);
+                    },
+
+                    specified: <span class="function"><span class="keyword">function</span> <span class="params">(id)</span> {</span>
+                        id = makeModuleMap(id, relMap, <span class="literal">false</span>, <span class="literal">true</span>).id;
+                        <span class="keyword">return</span> hasProp(defined, id) || hasProp(registry, id);
+                    }
+                });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-118">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-118">&#182;</a>
+              </div>
+              <p>Only allow undef on top level require calls</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!relMap) {
+                    localRequire.undef = <span class="function"><span class="keyword">function</span> <span class="params">(id)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-119">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-119">&#182;</a>
+              </div>
+              <p>Bind any waiting define() calls to this context,
+fix for #408</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        takeGlobalQueue();
+
+                        <span class="keyword">var</span> map = makeModuleMap(id, relMap, <span class="literal">true</span>),
+                            mod = getOwn(registry, id);
+
+                        <span class="keyword">delete</span> defined[id];
+                        <span class="keyword">delete</span> urlFetched[map.url];
+                        <span class="keyword">delete</span> undefEvents[id];
+
+                        <span class="keyword">if</span> (mod) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-120">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-120">&#182;</a>
+              </div>
+              <p>Hold on to listeners in case the
+module will be attempted to be reloaded
+using a different config.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">if</span> (mod.events.defined) {
+                                undefEvents[id] = mod.events;
+                            }
+
+                            cleanRegistry(id);
+                        }
+                    };
+                }
+
+                <span class="keyword">return</span> localRequire;
+            },
+
+            <span class="comment">/**
+             * Called to enable a module if it is still in the registry
+             * awaiting enablement. A second arg, parent, the parent module,
+             * is passed in for context, when this method is overriden by
+             * the optimizer. Not shown here to keep code compact.
+             */</span>
+            enable: <span class="function"><span class="keyword">function</span> <span class="params">(depMap)</span> {</span>
+                <span class="keyword">var</span> mod = getOwn(registry, depMap.id);
+                <span class="keyword">if</span> (mod) {
+                    getModule(depMap).enable();
+                }
+            },
+
+            <span class="comment">/**
+             * Internal method used by environment adapters to complete a load event.
+             * A load event could be a script load or just a load pass from a synchronous
+             * load call.
+             * @param {String} moduleName the name of the module to potentially complete.
+             */</span>
+            completeLoad: <span class="function"><span class="keyword">function</span> <span class="params">(moduleName)</span> {</span>
+                <span class="keyword">var</span> found, args, mod,
+                    shim = getOwn(config.shim, moduleName) || {},
+                    shExports = shim.exports;
+
+                takeGlobalQueue();
+
+                <span class="keyword">while</span> (defQueue.length) {
+                    args = defQueue.shift();
+                    <span class="keyword">if</span> (args[<span class="number">0</span>] === <span class="literal">null</span>) {
+                        args[<span class="number">0</span>] = moduleName;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-121">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-121">&#182;</a>
+              </div>
+              <p>If already found an anonymous module and bound it
+to this name, then this is some other anon module
+waiting for its completeLoad to fire.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        <span class="keyword">if</span> (found) {
+                            <span class="keyword">break</span>;
+                        }
+                        found = <span class="literal">true</span>;
+                    } <span class="keyword">else</span> <span class="keyword">if</span> (args[<span class="number">0</span>] === moduleName) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-122">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-122">&#182;</a>
+              </div>
+              <p>Found matching define call for this script!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        found = <span class="literal">true</span>;
+                    }
+
+                    callGetModule(args);
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-123">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-123">&#182;</a>
+              </div>
+              <p>Do this after the cycle of callGetModule in case the result
+of those calls/init calls changes the registry.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                mod = getOwn(registry, moduleName);
+
+                <span class="keyword">if</span> (!found &amp;&amp; !hasProp(defined, moduleName) &amp;&amp; mod &amp;&amp; !mod.inited) {
+                    <span class="keyword">if</span> (config.enforceDefine &amp;&amp; (!shExports || !getGlobal(shExports))) {
+                        <span class="keyword">if</span> (hasPathFallback(moduleName)) {
+                            <span class="keyword">return</span>;
+                        } <span class="keyword">else</span> {
+                            <span class="keyword">return</span> onError(makeError(<span class="string">'nodefine'</span>,
+                                             <span class="string">'No define call for '</span> + moduleName,
+                                             <span class="literal">null</span>,
+                                             [moduleName]));
+                        }
+                    } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-124">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-124">&#182;</a>
+              </div>
+              <p>A script that does not call define(), so just simulate
+the call for it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                        callGetModule([moduleName, (shim.deps || []), shim.exportsFn]);
+                    }
+                }
+
+                checkLoaded();
+            },
+
+            <span class="comment">/**
+             * Converts a module name to a file path. Supports cases where
+             * moduleName may actually be just an URL.
+             * Note that it **does not** call normalize on the moduleName,
+             * it is assumed to have already been normalized. This is an
+             * internal API, not a public one. Use toUrl for the public API.
+             */</span>
+            nameToUrl: <span class="function"><span class="keyword">function</span> <span class="params">(moduleName, ext, skipExt)</span> {</span>
+                <span class="keyword">var</span> paths, pkgs, pkg, pkgPath, syms, i, parentModule, url,
+                    parentPath;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-125">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-125">&#182;</a>
+              </div>
+              <p>If a colon is in the URL, it indicates a protocol is used and it is just
+an URL to a file, or if it starts with a slash, contains a query arg (i.e. ?)
+or ends with .js, then assume the user meant to use an url and not a module id.
+The slash is important for protocol-less URLs as well as full paths.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (req.jsExtRegExp.test(moduleName)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-126">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-126">&#182;</a>
+              </div>
+              <p>Just a plain path, not module name lookup, so just return it.
+Add extension if it is included. This is a bit wonky, only non-.js things pass
+an extension, this method probably needs to be reworked.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    url = moduleName + (ext || <span class="string">''</span>);
+                } <span class="keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-127">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-127">&#182;</a>
+              </div>
+              <p>A module that needs to be converted to a path.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    paths = config.paths;
+                    pkgs = config.pkgs;
+
+                    syms = moduleName.split(<span class="string">'/'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-128">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-128">&#182;</a>
+              </div>
+              <p>For each module name segment, see if there is a path
+registered for it. Start with most specific name
+and work up from it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">for</span> (i = syms.length; i &gt; <span class="number">0</span>; i -= <span class="number">1</span>) {
+                        parentModule = syms.slice(<span class="number">0</span>, i).join(<span class="string">'/'</span>);
+                        pkg = getOwn(pkgs, parentModule);
+                        parentPath = getOwn(paths, parentModule);
+                        <span class="keyword">if</span> (parentPath) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-129">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-129">&#182;</a>
+              </div>
+              <p>If an array, it means there are a few choices,
+Choose the one that is desired</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">if</span> (isArray(parentPath)) {
+                                parentPath = parentPath[<span class="number">0</span>];
+                            }
+                            syms.splice(<span class="number">0</span>, i, parentPath);
+                            <span class="keyword">break</span>;
+                        } <span class="keyword">else</span> <span class="keyword">if</span> (pkg) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-130">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-130">&#182;</a>
+              </div>
+              <p>If module name is just the package name, then looking
+for the main module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                            <span class="keyword">if</span> (moduleName === pkg.name) {
+                                pkgPath = pkg.location + <span class="string">'/'</span> + pkg.main;
+                            } <span class="keyword">else</span> {
+                                pkgPath = pkg.location;
+                            }
+                            syms.splice(<span class="number">0</span>, i, pkgPath);
+                            <span class="keyword">break</span>;
+                        }
+                    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-131">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-131">&#182;</a>
+              </div>
+              <p>Join the path parts together, then figure out if baseUrl is needed.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    url = syms.join(<span class="string">'/'</span>);
+                    url += (ext || (<span class="regexp">/\?/</span>.test(url) || skipExt ? <span class="string">''</span> : <span class="string">'.js'</span>));
+                    url = (url.charAt(<span class="number">0</span>) === <span class="string">'/'</span> || url.match(<span class="regexp">/^[\w\+\.\-]+:/</span>) ? <span class="string">''</span> : config.baseUrl) + url;
+                }
+
+                <span class="keyword">return</span> config.urlArgs ? url +
+                                        ((url.indexOf(<span class="string">'?'</span>) === -<span class="number">1</span> ? <span class="string">'?'</span> : <span class="string">'&amp;'</span>) +
+                                         config.urlArgs) : url;
+            },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-132">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-132">&#182;</a>
+              </div>
+              <p>Delegates to req.load. Broken out as a separate function to
+allow overriding in the optimizer.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            load: <span class="function"><span class="keyword">function</span> <span class="params">(id, url)</span> {</span>
+                req.load(context, id, url);
+            },
+
+            <span class="comment">/**
+             * Executes a module callback function. Broken out as a separate function
+             * solely to allow the build system to sequence the files in the built
+             * layer in the right sequence.
+             *
+             * @private
+             */</span>
+            execCb: <span class="function"><span class="keyword">function</span> <span class="params">(name, callback, args, exports)</span> {</span>
+                <span class="keyword">return</span> callback.apply(exports, args);
+            },
+
+            <span class="comment">/**
+             * callback for script loads, used to check status of loading.
+             *
+             * @param {Event} evt the event from the browser for the script
+             * that was loaded.
+             */</span>
+            onScriptLoad: <span class="function"><span class="keyword">function</span> <span class="params">(evt)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-133">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-133">&#182;</a>
+              </div>
+              <p>Using currentTarget instead of target for Firefox 2.0&#39;s sake. Not
+all old browsers will be supported, but this one was easy enough
+to support and still makes sense.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (evt.type === <span class="string">'load'</span> ||
+                        (readyRegExp.test((evt.currentTarget || evt.srcElement).readyState))) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-134">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-134">&#182;</a>
+              </div>
+              <p>Reset interactive script so a script node is not held onto for
+to long.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    interactiveScript = <span class="literal">null</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-135">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-135">&#182;</a>
+              </div>
+              <p>Pull out the name of the module and the context.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    <span class="keyword">var</span> data = getScriptData(evt);
+                    context.completeLoad(data.id);
+                }
+            },
+
+            <span class="comment">/**
+             * Callback for script errors.
+             */</span>
+            onScriptError: <span class="function"><span class="keyword">function</span> <span class="params">(evt)</span> {</span>
+                <span class="keyword">var</span> data = getScriptData(evt);
+                <span class="keyword">if</span> (!hasPathFallback(data.id)) {
+                    <span class="keyword">return</span> onError(makeError(<span class="string">'scripterror'</span>, <span class="string">'Script error for: '</span> + data.id, evt, [data.id]));
+                }
+            }
+        };
+
+        context.require = context.makeRequire();
+        <span class="keyword">return</span> context;
+    }
+
+    <span class="comment">/**
+     * Main entry point.
+     *
+     * If the only argument to require is a string, then the module that
+     * is represented by that string is fetched for the appropriate context.
+     *
+     * If the first argument is an array, then it will be treated as an array
+     * of dependency string names to fetch. An optional function callback can
+     * be specified to execute when all of those dependencies are available.
+     *
+     * Make a local req variable to help Caja compliance (it assumes things
+     * on a require that are not standardized), and to give a short
+     * name for minification/local scope use.
+     */</span>
+    req = requirejs = <span class="function"><span class="keyword">function</span> <span class="params">(deps, callback, errback, optional)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-136">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-136">&#182;</a>
+              </div>
+              <p>Find the right context, use default</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> context, config,
+            contextName = defContextName;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-137">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-137">&#182;</a>
+              </div>
+              <p>Determine if have config object in the call.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!isArray(deps) &amp;&amp; <span class="keyword">typeof</span> deps !== <span class="string">'string'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-138">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-138">&#182;</a>
+              </div>
+              <p>deps is a config object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            config = deps;
+            <span class="keyword">if</span> (isArray(callback)) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-139">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-139">&#182;</a>
+              </div>
+              <p>Adjust args if there are dependencies</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                deps = callback;
+                callback = errback;
+                errback = optional;
+            } <span class="keyword">else</span> {
+                deps = [];
+            }
+        }
+
+        <span class="keyword">if</span> (config &amp;&amp; config.context) {
+            contextName = config.context;
+        }
+
+        context = getOwn(contexts, contextName);
+        <span class="keyword">if</span> (!context) {
+            context = contexts[contextName] = req.s.newContext(contextName);
+        }
+
+        <span class="keyword">if</span> (config) {
+            context.configure(config);
+        }
+
+        <span class="keyword">return</span> context.require(deps, callback, errback);
+    };
+
+    <span class="comment">/**
+     * Support require.config() to make it easier to cooperate with other
+     * AMD loaders on globally agreed names.
+     */</span>
+    req.config = <span class="function"><span class="keyword">function</span> <span class="params">(config)</span> {</span>
+        <span class="keyword">return</span> req(config);
+    };
+
+    <span class="comment">/**
+     * Execute something after the current tick
+     * of the event loop. Override for other envs
+     * that have a better solution than setTimeout.
+     * @param  {Function} fn function to execute later.
+     */</span>
+    req.nextTick = <span class="keyword">typeof</span> setTimeout !== <span class="string">'undefined'</span> ? <span class="function"><span class="keyword">function</span> <span class="params">(fn)</span> {</span>
+        setTimeout(fn, <span class="number">4</span>);
+    } : <span class="function"><span class="keyword">function</span> <span class="params">(fn)</span> {</span> fn(); };
+
+    <span class="comment">/**
+     * Export require as a global, but only if it does not already exist.
+     */</span>
+    <span class="keyword">if</span> (!require) {
+        require = req;
+    }
+
+    req.version = version;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-140">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-140">&#182;</a>
+              </div>
+              <p>Used to filter out dependencies that are already paths.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    req.jsExtRegExp = <span class="regexp">/^\/|:|\?|\.js$/</span>;
+    req.isBrowser = isBrowser;
+    s = req.s = {
+        contexts: contexts,
+        newContext: newContext
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-141">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-141">&#182;</a>
+              </div>
+              <p>Create default context.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    req({});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-142">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-142">&#182;</a>
+              </div>
+              <p>Exports some context-sensitive methods on global require.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    each([
+        <span class="string">'toUrl'</span>,
+        <span class="string">'undef'</span>,
+        <span class="string">'defined'</span>,
+        <span class="string">'specified'</span>
+    ], <span class="function"><span class="keyword">function</span> <span class="params">(prop)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-143">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-143">&#182;</a>
+              </div>
+              <p>Reference from contexts instead of early binding to default context,
+so that during builds, the latest instance of the default context
+with its config gets used.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        req[prop] = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+            <span class="keyword">var</span> ctx = contexts[defContextName];
+            <span class="keyword">return</span> ctx.require[prop].apply(ctx, arguments);
+        };
+    });
+
+    <span class="keyword">if</span> (isBrowser) {
+        head = s.head = document.getElementsByTagName(<span class="string">'head'</span>)[<span class="number">0</span>];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-144">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-144">&#182;</a>
+              </div>
+              <p>If BASE tag is in play, using appendChild is a problem for IE6.
+When that browser dies, this can be removed. Details in this jQuery bug:
+<a href="http://dev.jquery.com/ticket/2709">http://dev.jquery.com/ticket/2709</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        baseElement = document.getElementsByTagName(<span class="string">'base'</span>)[<span class="number">0</span>];
+        <span class="keyword">if</span> (baseElement) {
+            head = s.head = baseElement.parentNode;
+        }
+    }
+
+    <span class="comment">/**
+     * Any errors that require explicitly generates will be passed to this
+     * function. Intercept/override it if you want custom error handling.
+     * @param {Error} err the error object.
+     */</span>
+    req.onError = defaultOnError;
+
+    <span class="comment">/**
+     * Does the request to load a module for the browser case.
+     * Make this a separate function to allow other environments
+     * to override it.
+     *
+     * @param {Object} context the require context to find state.
+     * @param {String} moduleName the name of the module.
+     * @param {Object} url the URL to the module.
+     */</span>
+    req.load = <span class="function"><span class="keyword">function</span> <span class="params">(context, moduleName, url)</span> {</span>
+        <span class="keyword">var</span> config = (context &amp;&amp; context.config) || {},
+            node;
+        <span class="keyword">if</span> (isBrowser) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-145">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-145">&#182;</a>
+              </div>
+              <p>In the browser so use a script tag</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            node = config.xhtml ?
+                    document.createElementNS(<span class="string">'http://www.w3.org/1999/xhtml'</span>, <span class="string">'html:script'</span>) :
+                    document.createElement(<span class="string">'script'</span>);
+            node.type = config.scriptType || <span class="string">'text/javascript'</span>;
+            node.charset = <span class="string">'utf-8'</span>;
+            node.async = <span class="literal">true</span>;
+
+            node.setAttribute(<span class="string">'data-requirecontext'</span>, context.contextName);
+            node.setAttribute(<span class="string">'data-requiremodule'</span>, moduleName);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-146">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-146">&#182;</a>
+              </div>
+              <p>Set up load listener. Test attachEvent first because IE9 has
+a subtle issue in its addEventListener and script onload firings
+that do not match the behavior of all other browsers with
+addEventListener support, which fire the onload event for a
+script right after the script execution. See:
+<a href="https://connect.microsoft.com/IE/feedback/details/648057/script-onload-event-is-not-fired-immediately-after-script-execution">https://connect.microsoft.com/IE/feedback/details/648057/script-onload-event-is-not-fired-immediately-after-script-execution</a>
+UNFORTUNATELY Opera implements attachEvent but does not follow the script
+script execution mode.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (node.attachEvent &amp;&amp;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-147">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-147">&#182;</a>
+              </div>
+              <p>Check if node.attachEvent is artificially added by custom script or
+natively supported by browser
+read <a href="https://github.com/jrburke/requirejs/issues/187">https://github.com/jrburke/requirejs/issues/187</a>
+if we can NOT find [native code] then it must NOT natively supported.
+in IE8, node.attachEvent does not have toString()
+Note the test for &quot;[native code&quot; with no closing brace, see:
+<a href="https://github.com/jrburke/requirejs/issues/273">https://github.com/jrburke/requirejs/issues/273</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    !(node.attachEvent.toString &amp;&amp; node.attachEvent.toString().indexOf(<span class="string">'[native code'</span>) &lt; <span class="number">0</span>) &amp;&amp;
+                    !isOpera) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-148">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-148">&#182;</a>
+              </div>
+              <p>Probably IE. IE (at least 6-8) do not fire
+script onload right after executing the script, so
+we cannot tie the anonymous define call to a name.
+However, IE reports the script as being in &#39;interactive&#39;
+readyState at the time of the define call.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                useInteractive = <span class="literal">true</span>;
+
+                node.attachEvent(<span class="string">'onreadystatechange'</span>, context.onScriptLoad);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-149">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-149">&#182;</a>
+              </div>
+              <p>It would be great to add an error handler here to catch
+404s in IE9+. However, onreadystatechange will fire before
+the error handler, so that does not help. If addEventListener
+is used, then IE will fire error before load, but we cannot
+use that pathway given the connect.microsoft.com issue
+mentioned above about not doing the &#39;script execute,
+then fire the script load event listener before execute
+next script&#39; that other browsers do.
+Best hope: IE10 fixes the issues,
+and then destroys all installs of IE 6-9.
+node.attachEvent(&#39;onerror&#39;, context.onScriptError);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            } <span class="keyword">else</span> {
+                node.addEventListener(<span class="string">'load'</span>, context.onScriptLoad, <span class="literal">false</span>);
+                node.addEventListener(<span class="string">'error'</span>, context.onScriptError, <span class="literal">false</span>);
+            }
+            node.src = url;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-150">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-150">&#182;</a>
+              </div>
+              <p>For some cache cases in IE 6-8, the script executes before the end
+of the appendChild execution, so to tie an anonymous define
+call to the module name (which is stored on the node), hold on
+to a reference to this node, but clear after the DOM insertion.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            currentlyAddingScript = node;
+            <span class="keyword">if</span> (baseElement) {
+                head.insertBefore(node, baseElement);
+            } <span class="keyword">else</span> {
+                head.appendChild(node);
+            }
+            currentlyAddingScript = <span class="literal">null</span>;
+
+            <span class="keyword">return</span> node;
+        } <span class="keyword">else</span> <span class="keyword">if</span> (isWebWorker) {
+            <span class="keyword">try</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-151">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-151">&#182;</a>
+              </div>
+              <p>In a web worker, use importScripts. This is not a very
+efficient use of importScripts, importScripts will block until
+its script is downloaded and evaluated. However, if web workers
+are in play, the expectation that a build has been done so that
+only one script needs to be loaded anyway. This may need to be
+reevaluated if other use cases become common.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                importScripts(url);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-152">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-152">&#182;</a>
+              </div>
+              <p>Account for anonymous modules</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                context.completeLoad(moduleName);
+            } <span class="keyword">catch</span> (e) {
+                context.onError(makeError(<span class="string">'importscripts'</span>,
+                                <span class="string">'importScripts failed for '</span> +
+                                    moduleName + <span class="string">' at '</span> + url,
+                                e,
+                                [moduleName]));
+            }
+        }
+    };
+
+    <span class="function"><span class="keyword">function</span> <span class="title">getInteractiveScript</span><span class="params">()</span> {</span>
+        <span class="keyword">if</span> (interactiveScript &amp;&amp; interactiveScript.readyState === <span class="string">'interactive'</span>) {
+            <span class="keyword">return</span> interactiveScript;
+        }
+
+        eachReverse(scripts(), <span class="function"><span class="keyword">function</span> <span class="params">(script)</span> {</span>
+            <span class="keyword">if</span> (script.readyState === <span class="string">'interactive'</span>) {
+                <span class="keyword">return</span> (interactiveScript = script);
+            }
+        });
+        <span class="keyword">return</span> interactiveScript;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-153">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-153">&#182;</a>
+              </div>
+              <p>Look for a data-main script attribute, which could also adjust the baseUrl.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> (isBrowser) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-154">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-154">&#182;</a>
+              </div>
+              <p>Figure out baseUrl. Get it from the script tag with require.js in it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        eachReverse(scripts(), <span class="function"><span class="keyword">function</span> <span class="params">(script)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-155">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-155">&#182;</a>
+              </div>
+              <p>Set the &#39;head&#39; where we can append children by
+using the script&#39;s parent.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (!head) {
+                head = script.parentNode;
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-156">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-156">&#182;</a>
+              </div>
+              <p>Look for a data-main attribute to set main script for the page
+to load. If it is there, the path to data main becomes the
+baseUrl, if it is not already set.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            dataMain = script.getAttribute(<span class="string">'data-main'</span>);
+            <span class="keyword">if</span> (dataMain) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-157">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-157">&#182;</a>
+              </div>
+              <p>Preserve dataMain in case it is a path (i.e. contains &#39;?&#39;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                mainScript = dataMain;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-158">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-158">&#182;</a>
+              </div>
+              <p>Set final baseUrl if there is not already an explicit one.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (!cfg.baseUrl) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-159">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-159">&#182;</a>
+              </div>
+              <p>Pull off the directory of data-main for use as the
+baseUrl.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                    src = mainScript.split(<span class="string">'/'</span>);
+                    mainScript = src.pop();
+                    subPath = src.length ? src.join(<span class="string">'/'</span>)  + <span class="string">'/'</span> : <span class="string">'./'</span>;
+
+                    cfg.baseUrl = subPath;
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-160">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-160">&#182;</a>
+              </div>
+              <p>Strip off any trailing .js since mainScript is now
+like a module name.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                mainScript = mainScript.replace(jsSuffixRegExp, <span class="string">''</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-161">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-161">&#182;</a>
+              </div>
+              <p>If mainScript is still a path, fall back to dataMain</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                <span class="keyword">if</span> (req.jsExtRegExp.test(mainScript)) {
+                    mainScript = dataMain;
+                }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-162">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-162">&#182;</a>
+              </div>
+              <p>Put the data-main script in the files to load.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                cfg.deps = cfg.deps ? cfg.deps.concat(mainScript) : [mainScript];
+
+                <span class="keyword">return</span> <span class="literal">true</span>;
+            }
+        });
+    }
+
+    <span class="comment">/**
+     * The function that handles definitions of modules. Differs from
+     * require() in that a string for the module should be the first argument,
+     * and the function to execute after dependencies are loaded should
+     * return a value to define the module corresponding to the first argument's
+     * name.
+     */</span>
+    define = <span class="function"><span class="keyword">function</span> <span class="params">(name, deps, callback)</span> {</span>
+        <span class="keyword">var</span> node, context;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-163">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-163">&#182;</a>
+              </div>
+              <p>Allow for anonymous modules</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (<span class="keyword">typeof</span> name !== <span class="string">'string'</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-164">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-164">&#182;</a>
+              </div>
+              <p>Adjust args appropriately</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            callback = deps;
+            deps = name;
+            name = <span class="literal">null</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-165">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-165">&#182;</a>
+              </div>
+              <p>This module may not have dependencies</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!isArray(deps)) {
+            callback = deps;
+            deps = <span class="literal">null</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-166">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-166">&#182;</a>
+              </div>
+              <p>If no name, and callback is a function, then figure out if it a
+CommonJS thing with dependencies.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (!deps &amp;&amp; isFunction(callback)) {
+            deps = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-167">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-167">&#182;</a>
+              </div>
+              <p>Remove comments from the callback string,
+look for require calls, and pull them into the dependencies,
+but only if there are function args.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span> (callback.length) {
+                callback
+                    .toString()
+                    .replace(commentRegExp, <span class="string">''</span>)
+                    .replace(cjsRequireRegExp, <span class="function"><span class="keyword">function</span> <span class="params">(match, dep)</span> {</span>
+                        deps.push(dep);
+                    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-168">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-168">&#182;</a>
+              </div>
+              <p>May be a CommonJS thing even without require calls, but still
+could use exports, and module. Avoid doing exports and module
+work though if it just needs require.
+REQUIRES the function to expect the CommonJS variables in the
+order listed below.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                deps = (callback.length === <span class="number">1</span> ? [<span class="string">'require'</span>] : [<span class="string">'require'</span>, <span class="string">'exports'</span>, <span class="string">'module'</span>]).concat(deps);
+            }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-169">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-169">&#182;</a>
+              </div>
+              <p>If in IE 6-8 and hit an anonymous define() call, do the interactive
+work.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> (useInteractive) {
+            node = currentlyAddingScript || getInteractiveScript();
+            <span class="keyword">if</span> (node) {
+                <span class="keyword">if</span> (!name) {
+                    name = node.getAttribute(<span class="string">'data-requiremodule'</span>);
+                }
+                context = contexts[node.getAttribute(<span class="string">'data-requirecontext'</span>)];
+            }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-170">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-170">&#182;</a>
+              </div>
+              <p>Always save off evaluating the def call until the script onload handler.
+This allows multiple modules to be in a file without prematurely
+tracing dependencies, and allows for anonymous module support,
+where the module name is not known until the script onload event
+occurs. If no context, use the global queue, and get it processed
+in the onscript load callback.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        (context ? context.defQueue : globalDefQueue).push([name, deps, callback]);
+    };
+
+    define.amd = {
+        jQuery: <span class="literal">true</span>
+    };
+
+
+    <span class="comment">/**
+     * Executes the text. Normally just uses eval, but can be modified
+     * to use a better, environment-specific call. Only used for transpiling
+     * loader plugins, not for plain JS modules.
+     * @param {String} text the text to execute/evaluate.
+     */</span>
+    req.exec = <span class="function"><span class="keyword">function</span> <span class="params">(text)</span> {</span>
+        <span class="comment">/*jslint evil: true */</span>
+        <span class="keyword">return</span> eval(text);
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-171">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-171">&#182;</a>
+              </div>
+              <p>Set up with config info.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    req(cfg);
+}(<span class="keyword">this</span>));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "description": "curves",
+  "dependencies": {
+    "grunt": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-docco": "*"
+  }
+}
