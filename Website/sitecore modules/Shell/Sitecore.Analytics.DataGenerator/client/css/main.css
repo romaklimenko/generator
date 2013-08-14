@@ -17,7 +17,18 @@ div.chart-header {
   font-size: 90%;
 }
 
+a.chart-header {
+  cursor: pointer;
+  text-transform: uppercase;
+  margin: 0px 0px 0px 10px;
+  font-size: 90%;
+}
+
 .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
   color: #FFF;
   background-color: #C73318;
+}
+
+.toolbox {
+  margin-right: 25px;
 }

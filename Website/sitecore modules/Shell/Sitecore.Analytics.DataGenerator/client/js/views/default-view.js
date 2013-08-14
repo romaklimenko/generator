@@ -10,7 +10,8 @@ define(
     "text!all",
     "text!campaign",
     "text!default-view-template",
-    "chart-view"
+    "chart-view",
+    "campaigns-modal-view",
   ],
   function(
     Backbone,
@@ -20,13 +21,25 @@ define(
     AllData,
     CampaignData,
     DefaultViewTemplate,
-    ChartView) {
+    ChartView,
+    CampaignsModalView) {
 
     "use strict";
 
     var DefaultView = Backbone.View.extend({
 
+      events: {
+        "click .campaign-name": "selectCampaign"
+      },
+
+      selectCampaign: function() {
+        this.campaignsModalView.show();
+      },
+
       initialize: function() {
+
+        this.campaignsModalView = new CampaignsModalView();
+
         var i;
 
         // all

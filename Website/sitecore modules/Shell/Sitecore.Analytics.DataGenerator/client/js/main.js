@@ -5,6 +5,7 @@ requirejs.config({
   paths: {
     // vendor
     "backbone": "./vendor/backbone",
+    "bootstrap": "./vendor/bootstrap",
     "d3": "./vendor/d3",
     "raphael": "./vendor/raphael",
     "jquery": "./vendor/jquery",
@@ -31,15 +32,20 @@ requirejs.config({
 
     // views
     "default-view": "./views/default-view",
+    "campaigns-modal-view": "./views/campaigns-modal-view",
     "chart-view": "./views/chart-view",
 
     // templates
-    "default-view-template": "../templates/default-view-template.html"
+    "default-view-template": "../templates/default-view-template.html",
+    "campaigns-modal-view-template": "../templates/campaigns-modal-view-template.html"
   },
   shim: {
     "backbone": {
       deps: ["underscore", "jquery"],
       exports: "Backbone"
+    },
+    "bootstrap": {
+      deps: ["jquery"]
     },
     "d3": {
       exports: "d3"
@@ -59,7 +65,8 @@ requirejs.config({
 require(
   [
     "jquery",
-    "app"
+    "app",
+    "bootstrap"
   ],
   function($, App) {
     "use strict";
