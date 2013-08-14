@@ -1,0 +1,1 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Campaigns.aspx.cs" Inherits="Sitecore.Analytics.DataGenerator.Api.Campaigns" %>
