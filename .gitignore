@@ -1,3 +1,25 @@
+# Sitecore
+# TODO: optimize that!
+/Data
+/Database
+/Website/App_Browsers
+/Website/App_Config
+/Website/bin
+/Website/layouts
+/Website/sitecore
+/Website/sitecore_files
+/Website/temp
+/Website/upload
+/Website/xsl
+/Website/Default.aspx
+/Website/default.css
+/Website/default.htm.sitedown
+/Website/default.js
+/Website/Design.config
+/Website/Global.asax
+/Website/Web.config*
+/Website/webedit.css
+
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
 [Bb]in/
 [Oo]bj/
@@ -59,7 +81,7 @@ _ReSharper*
 *.ncrunch*
 .*crunch*.local.xml
 
-# Installshield output folder 
+# Installshield output folder
 [Ee]xpress
 
 # DocProject is a documentation generator add-in
