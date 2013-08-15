@@ -36,8 +36,7 @@ requirejs.config({
     "chart-view": "./views/chart-view",
 
     // templates
-    "default-view-template": "../templates/default-view-template.html",
-    "campaigns-modal-view-template": "../templates/campaigns-modal-view-template.html"
+    "default-view-template": "../templates/default-view-template.html"
   },
   shim: {
     "backbone": {

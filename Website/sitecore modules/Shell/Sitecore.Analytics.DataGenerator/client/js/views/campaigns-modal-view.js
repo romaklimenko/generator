@@ -4,24 +4,35 @@ define(
   [
     "backbone",
     "jquery",
-    "text!campaigns-modal-view-template",
+    "underscore",
     "bootstrap"
   ],
   function(
     Backbone,
     $,
-    CampaignsModalViewTemplate) {
+    _) {
 
     "use strict";
 
     var CampaignsModalView = Backbone.View.extend({
 
-      initialize: function() {
-        this.render();
+      events: {
+        "click .btn-ok": "selectCampaign"
       },
 
-      render: function() {
-        $("body").append(CampaignsModalViewTemplate);
+      selectCampaign: function(event) {
+        var self = event.data.self;
+        self.trigger(
+          "campaign:selected",
+          {
+            CampaignId: $("#campaigns-modal-view-body > div.radio > label > input:checked").attr("id"),
+            CampaignPath: $("#campaigns-modal-view-body > div.radio > label > input:checked").val()
+          });
+        event.data.self.hide();
+      },
+
+      initialize: function() {
+        this.setElement($("#campaigns-modal-view"));
       },
 
       hide: function() {
@@ -29,7 +40,12 @@ define(
       },
 
       show: function() {
+        $("#campaigns-modal-view")
+          .unbind("click")
+          .on("click", ".btn-ok", { self: this }, this.selectCampaign);
+
         this.fill();
+
         $("#campaigns-modal-view").modal("show");
       },
 
@@ -37,7 +53,6 @@ define(
 
         var template = $("#campaigns-modal-radio-template").html();
 
-        var self = this;
         $
         .ajax({
           url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/campaigns.aspx"
@@ -55,9 +70,11 @@ define(
           modalBody.empty();
 
           for (var i = 0; i < data.length; i++) {
-            // data[i]
             modalBody.append(_.template(template, data[i]));
-          };
+            if (i === 0) {
+              $("#campaigns-modal-view-body > div.radio > label > input").first().attr('checked', true);
+            }
+          }
         })
         .fail(function() {
           alert("error");

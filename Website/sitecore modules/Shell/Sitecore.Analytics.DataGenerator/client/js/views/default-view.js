@@ -29,16 +29,21 @@ define(
     var DefaultView = Backbone.View.extend({
 
       events: {
-        "click .campaign-name": "selectCampaign"
+        "click .campaign-name": "showCampaignsModal"
       },
 
-      selectCampaign: function() {
+      showCampaignsModal: function() {
         this.campaignsModalView.show();
       },
 
       initialize: function() {
 
         this.campaignsModalView = new CampaignsModalView();
+
+        this.listenTo(
+          this.campaignsModalView,
+          'campaign:selected',
+          this.setCampaign);
 
         var i;
 
@@ -71,6 +76,11 @@ define(
             })
           );
         }
+      },
+
+      setCampaign: function(data) {
+        this.campaign = data;
+        this.$el.find(".campaign-name").html(data.CampaignPath);
       },
 
       render: function() {
