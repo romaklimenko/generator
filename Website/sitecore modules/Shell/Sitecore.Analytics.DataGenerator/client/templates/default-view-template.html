@@ -4,13 +4,21 @@
 <div id="default-view-bottom-chart">bottom-chart</div>
 
 <div class="pull-right toolbox">
+  <label for="from-date">From:</label>
+  <input id="from-date" type="date" value="2013-01-01" />
+  <label for="to-date">To:</label>
+  <input id="to-date" type="date" value="2013-12-31" />
+  <label for="group-by">Group by:</label>
+  <select id="group-by">
+    <option>Year</option>
+    <option>Quarter</option>
+    <option>Month</option>
+    <option>Day</option>
+  </select>
   <button type="button" class="btn btn-default">Reset</button>
   <button type="button" class="btn btn-danger">Generate</button>
 </div>
 
-<div class="clearfix"></div>
-
-<!-- Campaigns Modal View -->
 <div class="modal fade" id="campaigns-modal-view">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -26,8 +34,9 @@
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-primary btn-ok">Select</button>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+    </div>
+  </div>
+
   <script id="campaigns-modal-radio-template" type="text/template">
     <div class="radio">
       <label>
@@ -35,5 +44,8 @@
         <%= CampaignPath %>
       </label>
     </div>
+
   </script>
-</div><!-- /.modal -->
+</div>
+
+<div class="clearfix"></div>
