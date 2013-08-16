@@ -51,6 +51,7 @@ define(
         this.allDays = new DaysCollection();
 
         var allData = JSON.parse(AllData);
+        console.log(AllData);
 
         for (i = 0; i < allData.length; i++) {
           this.allDays.add(
@@ -81,45 +82,82 @@ define(
       setCampaign: function(data) {
         this.campaign = data;
         this.$el.find(".campaign-name").html(data.CampaignPath);
+        this.renderCampaignDataChart();
       },
 
       render: function() {
+        var self = this;
 
-        this.$el.html(DefaultViewTemplate);
+        self.$el.html(DefaultViewTemplate);
 
-        var topChartView = new ChartView({
+        self.renderAllDataChart();
+
+        if (!self.campaign) {
+          $
+          .ajax({
+            url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/campaigns.aspx"
+          })
+          .done(function(data, textStatus, jqXHR) {
+            console.log(
+            {
+              data: data,
+              textStatus: textStatus,
+              jqXHR: jqXHR
+            });
+            self.setCampaign(data[0]);
+          })
+          .fail(function() {
+            alert("error");
+          });
+        }
+      },
+
+      renderAllDataChart: function() {
+        var self = this;
+
+        self.topChartView = new ChartView({
           el: $("#default-view-top-chart"),
-          models: this.allDays
-        });
-
-        var bottomChartView = new ChartView({
-          el: $("#default-view-bottom-chart"),
-          models: this.campaignDays
+          models: self.allDays
         });
 
         $(window).resize(function() {
-          topChartView.render();
-          bottomChartView.render();
+          self.topChartView.render();
         });
 
-        bottomChartView.collection.on("change", function(campaignModel) {
+        self.topChartView.render();
+      },
+
+      renderCampaignDataChart: function() {
+        var self = this;
+
+        self.bottomChartView = new ChartView({
+          el: $("#default-view-bottom-chart"),
+          models: self.campaignDays
+        });
+
+        $(window).resize(function() {
+          console.log('resize');
+          self.bottomChartView.render();
+        });
+
+        self.bottomChartView.collection.on("change", function(campaignModel) {
           function delta(model, attribute) {
             return model.get(attribute) - model.previous(attribute);
           }
 
-          var allDataModel = topChartView.collection.get(campaignModel.id);
+          var allDataModel = self.topChartView.collection.get(campaignModel.id);
 
           allDataModel.set(
             {
               "visits": allDataModel.get("visits") + delta(campaignModel, "visits"),
               "value": allDataModel.get("value") + delta(campaignModel, "value")
             });
-          topChartView.render();
-        }, this);
+          self.topChartView.render();
+        }, self);
 
-        topChartView.render();
-        bottomChartView.render();
+        self.bottomChartView.render();
       }
+
     });
 
     return DefaultView;
