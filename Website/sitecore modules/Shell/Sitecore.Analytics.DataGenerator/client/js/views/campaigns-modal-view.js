@@ -39,17 +39,24 @@ define(
         $("#campaigns-modal-view").modal("hide");
       },
 
-      show: function() {
+      show: function(sender) {
+
         $("#campaigns-modal-view")
           .unbind("click")
           .on("click", ".btn-ok", { self: this }, this.selectCampaign);
 
-        this.fill();
+        this.fill(sender);
 
         $("#campaigns-modal-view").modal("show");
       },
 
-      fill: function() {
+      fill: function(params) {
+
+        var selectedCampaignId;
+
+        if (params) {
+          selectedCampaignId = params.selectedCampaignId;
+        }
 
         var template = $("#campaigns-modal-radio-template").html();
 
@@ -74,6 +81,10 @@ define(
             if (i === 0) {
               $("#campaigns-modal-view-body > div.radio > label > input").first().attr('checked', true);
             }
+          }
+
+          if (params && params.selectedCampaignId) {
+            $("input#" + selectedCampaignId + ":radio[name='optionsRadios']").attr('checked', 'checked');
           }
         })
         .fail(function() {

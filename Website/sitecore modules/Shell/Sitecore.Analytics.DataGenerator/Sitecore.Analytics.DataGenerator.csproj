@@ -73,10 +73,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Api\Campaigns.aspx" />
+    <Content Include="Api\Visits.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\Campaigns.aspx.cs">
       <DependentUpon>Campaigns.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Api\Visits.aspx.cs">
+      <DependentUpon>Visits.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
   </ItemGroup>

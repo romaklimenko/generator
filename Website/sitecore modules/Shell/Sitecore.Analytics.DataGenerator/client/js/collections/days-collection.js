@@ -45,7 +45,7 @@ define(["backbone", "underscore", "day-model"], function(Backbone, _, DayModel) 
 
       var model;
 
-      var avg = function(attr) {
+      var sum = function(attr) {
         return Math.floor(_.reduce(span, function(memo, dayModel) {
             return memo + parseInt(dayModel.get(attr), 10);
           }, 0) / span.length);
@@ -57,8 +57,8 @@ define(["backbone", "underscore", "day-model"], function(Backbone, _, DayModel) 
 
           model = new DayModel({
             date: this.models[i].get("date"),
-            visits: avg("visits"),
-            value: avg("value")
+            visits: sum("visits"),
+            value: sum("value")
           });
           result.add(model);
         }

@@ -94,7 +94,7 @@ define(["main", "../../js/vendor/chai.js", "day-model", "days-collection"],
           assert.equal(lengthExpected, this.daysCollection.length);
         });
 
-        it("should contain average values on each element", function() {
+        it("should contain summarized values on each element", function() {
           var lengthExpected = 3;
           var shrinkedCollection = this.daysCollection.shrink(lengthExpected);
           // first group:
@@ -103,11 +103,9 @@ define(["main", "../../js/vendor/chai.js", "day-model", "days-collection"],
           // 20130103 3 7
           // 20130104 4 6
           assert.equal("20130101", shrinkedCollection.models[0].get("date"));
-          assert.equal(
-            Math.floor((1 + 2 + 3 + 4) / 4),
+          assert.equal(1 + 2 + 3 + 4,
             shrinkedCollection.models[0].get("visits"));
-          assert.equal(
-            Math.floor((9 + 8 + 7 + 6) / 4),
+          assert.equal(9 + 8 + 7 + 6,
             shrinkedCollection.models[0].get("value"));
 
           // second group:
@@ -116,22 +114,18 @@ define(["main", "../../js/vendor/chai.js", "day-model", "days-collection"],
           // 20130107 7 3
           // 20130108 8 2
           assert.equal("20130105", shrinkedCollection.models[1].get("date"));
-          assert.equal(
-            Math.floor((5 + 6 + 7 + 8) / 4),
+          assert.equal(5 + 6 + 7 + 8,
             shrinkedCollection.models[1].get("visits"));
-          assert.equal(
-            Math.floor((5 + 4 + 3 + 2) / 4),
+          assert.equal(5 + 4 + 3 + 2,
             shrinkedCollection.models[1].get("value"));
 
           // third group:
           // 20130109 9 1
           // 20130110 0 0
           assert.equal("20130109", shrinkedCollection.models[2].get("date"));
-          assert.equal(
-            Math.floor(9 / 2),
+          assert.equal(9,
             shrinkedCollection.models[2].get("visits"));
-          assert.equal(
-            Math.floor(1 / 2),
+          assert.equal(1,
             shrinkedCollection.models[2].get("value"));
         });
       });

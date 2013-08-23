@@ -33,7 +33,10 @@ define(
       },
 
       showCampaignsModal: function() {
-        this.campaignsModalView.show();
+        this.campaignsModalView.show(
+          {
+            selectedCampaignId: this.campaign.CampaignId
+          });
       },
 
       initialize: function() {
@@ -44,39 +47,6 @@ define(
           this.campaignsModalView,
           'campaign:selected',
           this.setCampaign);
-
-        var i;
-
-        // all
-        this.allDays = new DaysCollection();
-
-        var allData = JSON.parse(AllData);
-        console.log(AllData);
-
-        for (i = 0; i < allData.length; i++) {
-          this.allDays.add(
-            new DayModel({
-              date: allData[i].date,
-              visits: allData[i].visits,
-              value: allData[i].value
-            })
-          );
-        }
-
-        // campaign
-        this.campaignDays = new DaysCollection();
-
-        var campaignData = JSON.parse(CampaignData);
-
-        for (i = 0; i < campaignData.length; i++) {
-          this.campaignDays.add(
-            new DayModel({
-              date: campaignData[i].date,
-              visits: campaignData[i].visits,
-              value: campaignData[i].value
-            })
-          );
-        }
       },
 
       setCampaign: function(data) {
@@ -91,71 +61,153 @@ define(
         self.$el.html(DefaultViewTemplate);
 
         self.renderAllDataChart();
-
-        if (!self.campaign) {
-          $
-          .ajax({
-            url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/campaigns.aspx"
-          })
-          .done(function(data, textStatus, jqXHR) {
-            console.log(
-            {
-              data: data,
-              textStatus: textStatus,
-              jqXHR: jqXHR
-            });
-            self.setCampaign(data[0]);
-          })
-          .fail(function() {
-            alert("error");
-          });
-        }
       },
 
       renderAllDataChart: function() {
         var self = this;
 
-        self.topChartView = new ChartView({
-          el: $("#default-view-top-chart"),
-          models: self.allDays
-        });
+        $
+        .ajax({
+          url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/visits.aspx"
+        })
+        .done(function(data, textStatus, jqXHR) {
+          console.log(
+          {
+            data: data,
+            textStatus: textStatus,
+            jqXHR: jqXHR
+          });
 
-        $(window).resize(function() {
+          // all
+          self.allDays = new DaysCollection();
+
+          for (var i = 0; i < data.length; i++) {
+            self.allDays.add(
+              new DayModel({
+                date: data[i].Date,
+                visits: data[i].Visits,
+                value: data[i].Value
+              })
+            );
+          }
+
+          console.log(self.allDays);
+
+          if (!self.campaign) {
+            $
+            .ajax({
+              url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/campaigns.aspx"
+            })
+            .done(function(data, textStatus, jqXHR) {
+              console.log(
+              {
+                data: data,
+                textStatus: textStatus,
+                jqXHR: jqXHR
+              });
+              self.setCampaign(data[0]);
+            })
+            .fail(function() {
+              alert("error");
+            });
+          }
+
+          self.topChartView = new ChartView({
+            el: $("#default-view-top-chart"),
+            models: self.allDays
+          });
+
+          $(window).resize(function() {
+            self.topChartView.render();
+          });
+
           self.topChartView.render();
-        });
 
-        self.topChartView.render();
+        })
+        .fail(function() {
+          alert("error");
+        });
       },
 
       renderCampaignDataChart: function() {
         var self = this;
 
-        self.bottomChartView = new ChartView({
-          el: $("#default-view-bottom-chart"),
-          models: self.campaignDays
-        });
+        $
+        .ajax({
+          url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/visits.aspx",
+          data: {
+            "campaignId": self.campaign.CampaignId
+          }
+        })
+        .done(function(data, textStatus, jqXHR) {
+          console.log(
+          {
+            data: data,
+            textStatus: textStatus,
+            jqXHR: jqXHR
+          });
 
-        $(window).resize(function() {
-          console.log('resize');
-          self.bottomChartView.render();
-        });
+          // campaign
+          self.campaignDays = new DaysCollection();
 
-        self.bottomChartView.collection.on("change", function(campaignModel) {
-          function delta(model, attribute) {
-            return model.get(attribute) - model.previous(attribute);
+          for (var i = 0; i < data.length; i++) {
+            self.campaignDays.add(
+              new DayModel({
+                date: data[i].Date,
+                visits: data[i].Visits,
+                value: data[i].Value
+              })
+            );
           }
 
-          var allDataModel = self.topChartView.collection.get(campaignModel.id);
+          if (self.campaignDays.get(self.allDays.first().id) === undefined) {
+            self.campaignDays.add(
+              new DayModel({
+                date: self.allDays.first().id,
+                visits: 0,
+                value: 0
+              }));
+          };
 
-          allDataModel.set(
-            {
-              "visits": allDataModel.get("visits") + delta(campaignModel, "visits"),
-              "value": allDataModel.get("value") + delta(campaignModel, "value")
-            });
-          self.topChartView.render();
-        }, self);
+          if (self.campaignDays.get(self.allDays.last().id) === undefined) {
+            self.campaignDays.add(
+              new DayModel({
+                date: self.allDays.last().id,
+                visits: 0,
+                value: 0
+              }));
+          };
 
-        self.bottomChartView.render();
+          self.bottomChartView = new ChartView({
+            el: $("#default-view-bottom-chart"),
+            models: self.campaignDays
+          });
+
+          self.bottomChartView.collection.on("change", function(campaignModel) {
+            function delta(model, attribute) {
+              return model.get(attribute) - model.previous(attribute);
+            }
+
+            var allDataModel = self.topChartView.collection.get(campaignModel.id);
+
+            allDataModel.set(
+              {
+                "visits": allDataModel.get("visits") + delta(campaignModel, "visits"),
+                "value": allDataModel.get("value") + delta(campaignModel, "value")
+              });
+            self.topChartView.render();
+          }, self);
+
+          $(window).resize(function() {
+            console.log('resize');
+            self.bottomChartView.render();
+          });
+
+          self.bottomChartView.render();
+        })
+        .fail(function() {
+          alert("error");
+        });
       }
 
     });
