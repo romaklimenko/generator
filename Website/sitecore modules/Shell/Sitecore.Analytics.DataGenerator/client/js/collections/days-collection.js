@@ -46,9 +46,9 @@ define(["backbone", "underscore", "day-model"], function(Backbone, _, DayModel) 
       var model;
 
       var sum = function(attr) {
-        return Math.floor(_.reduce(span, function(memo, dayModel) {
+        return _.reduce(span, function(memo, dayModel) {
             return memo + parseInt(dayModel.get(attr), 10);
-          }, 0) / span.length);
+          }, 0);
       };
 
       for (var i = 0; i < this.length; i++) {
