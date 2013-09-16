@@ -1,14 +1,14 @@
 Generator:
-  This week:
-    ☐ Reset top view when swich over campaign
-    ☐ Reset button
-    ☐ Generate button - post data to server
+  Monday:
+    ✔ Reset top view when swich over campaign @done (13-09-16 17:46)
+    ✔ Reset button @done (13-09-16 17:56)
+    ✔ Generate button - post data to server @done (13-09-16 18:59)
+  Tuesday:
     ☐ Handle posted data on server - service API
-  Next Week:
     ☐ Generate visits
       ☐ Prepare intermediate values
       ☐ Execute SQL
+  Wednesday:
     ☐ Installation package
     ☐ Build script
-  Extra:
     ☐ Date labels

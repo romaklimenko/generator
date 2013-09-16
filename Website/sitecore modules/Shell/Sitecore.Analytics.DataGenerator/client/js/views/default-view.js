@@ -29,7 +29,29 @@ define(
     var DefaultView = Backbone.View.extend({
 
       events: {
-        "click .campaign-name": "showCampaignsModal"
+        "click .campaign-name": "showCampaignsModal",
+        "click .btn-reset": "reset",
+        "click .btn-generate": "generate"
+      },
+
+      generate: function() {
+        var self = this;
+
+        //window.collection = self.bottomChartView.collection;
+        $
+        .ajax({
+          url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/Generator.aspx",
+          type: "POST",
+          data: { data: JSON.stringify(self.bottomChartView.collection.toJSON()) }
+        })
+        .done(function(data, textStatus, jqXHR) {
+          console.log(
+          {
+            data: data,
+            textStatus: textStatus,
+            jqXHR: jqXHR
+          });
+        });
       },
 
       showCampaignsModal: function() {
@@ -45,13 +67,14 @@ define(
 
         this.listenTo(
           this.campaignsModalView,
-          'campaign:selected',
+          "campaign:selected",
           this.setCampaign);
       },
 
       setCampaign: function(data) {
         this.campaign = data;
         this.$el.find(".campaign-name").html(data.CampaignPath);
+        this.renderAllDataChart();
         this.renderCampaignDataChart();
       },
 
@@ -208,6 +231,11 @@ define(
         .fail(function() {
           alert("error");
         });
+      },
+
+      reset: function() {
+        this.renderAllDataChart();
+        this.renderCampaignDataChart();
       }
 
     });
