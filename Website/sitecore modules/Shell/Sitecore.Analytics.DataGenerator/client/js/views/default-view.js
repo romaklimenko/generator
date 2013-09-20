@@ -37,7 +37,8 @@ define(
       generate: function() {
         var self = this;
 
-        //window.collection = self.bottomChartView.collection;
+        $("#progress-modal-view").modal("show");
+
         $
         .ajax({
           url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/Generator.aspx",
@@ -45,6 +46,7 @@ define(
           data: { data: JSON.stringify(self.bottomChartView.collection.toJSON()) }
         })
         .done(function(data, textStatus, jqXHR) {
+          $("#progress-modal-view").modal("hide");
           console.log(
           {
             data: data,
