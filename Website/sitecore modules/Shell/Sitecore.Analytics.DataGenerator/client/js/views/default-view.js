@@ -198,7 +198,7 @@ define(
                 visits: 0,
                 value: 0
               }));
-          };
+          }
 
           if (self.campaignDays.get(self.allDays.last().id) === undefined) {
             self.campaignDays.add(
@@ -207,7 +207,7 @@ define(
                 visits: 0,
                 value: 0
               }));
-          };
+          }
 
           self.bottomChartView = new ChartView({
             el: $("#default-view-bottom-chart"),
