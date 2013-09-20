@@ -43,10 +43,16 @@ define(
         .ajax({
           url: "http://generator/sitecore modules/Shell/Sitecore.Analytics.DataGenerator/api/Generator.aspx",
           type: "POST",
-          data: { data: JSON.stringify(self.bottomChartView.collection.toJSON()) }
+          data:
+          {
+            data: JSON.stringify(self.bottomChartView.collection.toJSON()),
+            campaignId: this.campaign.CampaignId
+          }
         })
         .done(function(data, textStatus, jqXHR) {
           $("#progress-modal-view").modal("hide");
+          self.renderAllDataChart();
+          self.renderCampaignDataChart();
           console.log(
           {
             data: data,
